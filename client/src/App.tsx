@@ -1,7 +1,19 @@
-import React from "react";
-
+import { BrowserRouter, Routes, Route } from "react-router";
+import MainLayout from "./Layouts/MainLayout";
+import { Navigate } from "react-router";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 function App() {
-  return <div className="bg-red-600">App</div>;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<MainLayout />}></Route>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
