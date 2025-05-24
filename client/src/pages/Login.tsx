@@ -14,10 +14,14 @@ function Login() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
 
   const validateForm = () => {
     const errors = {
-      email: email.trim() === "",
+      email: email.trim() !== "" && !isValidEmail(email),
       password: password.trim() === ""
     };
 
@@ -56,7 +60,7 @@ function Login() {
           <div className="space-y-6">
             {/* Username/Email field */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" itemType="email" className="block text-sm font-medium text-gray-700">
                 Username or email <span className="text-red-500">*</span>
               </label>
               <input
