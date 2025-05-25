@@ -61,7 +61,7 @@ function NewPatient() {
             {/* Name and Email Row */}
             <div className="flex gap-4">
               {/* Name - 25% */}
-              <div className="w-1/4">
+              <div className="w-1/1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
                 <input
                   type="text"
@@ -74,7 +74,7 @@ function NewPatient() {
               </div>
 
               {/* Email - 25% */}
-              <div className="w-1/4">
+              <div className="w-1/1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                 <input
                   type="email"
@@ -205,4 +205,4 @@ function NewPatient() {
   );
 }
 
-export default NewPatient
+export default NewPatient;
