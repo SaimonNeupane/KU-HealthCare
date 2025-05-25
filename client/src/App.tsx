@@ -3,6 +3,8 @@ import MainLayout from "./Layouts/MainLayout";
 import { Navigate } from "react-router";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+// import Receptionist from "./pages/Receptionist";
+import NewPatient from "./pages/Receptionist/NewPatient";
 function App() {
   return (
     <BrowserRouter>
@@ -11,7 +13,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        {/* <Route path="/receptionist" element={<Receptionist />} /> */}
+        <Route path="/registration" element={<NewPatient />} />
       </Routes>
     </BrowserRouter>
   );
