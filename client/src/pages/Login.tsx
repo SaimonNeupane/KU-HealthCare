@@ -40,7 +40,7 @@ function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // Prevents page refresh
     console.log("Submitted email:", email);
-    navigate("/registration")
+    navigate("/receptionist/newpatient")
   };
 
   return (

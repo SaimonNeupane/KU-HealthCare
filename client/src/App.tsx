@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
 import NewPatient from "./pages/Receptionist/NewPatient.tsx";
+import Dashboard from "./pages/Receptionist/DashBoard.tsx";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
 
         <Route path="/receptionist/newpatient" element={<NewPatient />} />
+        <Route path="/receptionist/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   );

@@ -11,8 +11,8 @@ type DepartmentName =
 
 const departments: Record<DepartmentName, string[]> = {
   cardiology: ["Dr. Parikchit Sen", "Dr. Keshav Raj Sharma"],
-  neurology: ["Dr. Saimon Neupane", "Dr. Prabesh Sharma"],
-  orthopedics: ["Dr. Risham Raj Byahut", "Dr. Pitambar Chaudhary"],
+  neurology: ["Dr. Saimon Neupane", "Dr. Risham Raj Byahut"],
+  orthopedics: ["Dr. Prabesh Sharma", "Dr. Pitambar Chaudhary"],
   pediatrics: ["Dr. Salon Timilsina", "Dr. Udaya Ojha"],
   general: ["Dr. Gaurav Bista", "Dr. Shriharsha Acharya"],
   emergency: ["Dr. Prabesh Ojha", "Dr. Piyush Bhat"],
