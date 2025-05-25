@@ -1,6 +1,5 @@
-import React from "react";
-import { useState } from "react";
-
+import React, { useState } from "react";
+import { Search, User } from "lucide-react";
 
 type DepartmentName =
   | "cardiology"
@@ -10,7 +9,6 @@ type DepartmentName =
   | "general"
   | "emergency";
 
-//we will be fetching these from database..so just filled dummyData for progress!
 const departments: Record<DepartmentName, string[]> = {
   cardiology: ["Dr. Smith", "Dr. Patel"],
   neurology: ["Dr. Brain", "Dr. Watson"],
@@ -20,120 +18,189 @@ const departments: Record<DepartmentName, string[]> = {
   emergency: ["Dr. Rush", "Dr. Speed"],
 };
 
-function NewPatient()
-{
-  const[patientData, setPatientData] = useState(
-    {
-      name : '',
-      email : '',
-      phone : '',
-      gender : '',
-      address : '',
-      department : '',
-      doctor : '',
-      age : '',
-      emergency : false
-    }
-  );
-  return(
-    <div className="mx-[10vw] mt-4">
-      <div className="w-full border border-black rounded-none">
-        <h2 className="text-[36px] leading-[45px] font-extrabold">New Patient</h2>
+function NewPatient() {
+  const [patientData, setPatientData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    gender: '',
+    address: '',
+    department: '',
+    doctor: '',
+    age: '',
+    emergency: false
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Main Content */}
+      <div className="max-w-3xl mx-auto px-6 py-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Register New Patient</h1>
+            <p className="text-gray-600 text-sm leading-relaxed max-w-2xl">
+              Collect patient's name, email, phone number, date of birth, gender, and address. Display created at timestamp. Include a
+              field to indicate if the patient is admitted to emergency, alongside the number of available beds.
+            </p>
+          </div>
+
+          {/* Emergency Checkbox */}
+          <div className="mb-8">
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={patientData.emergency}
+                onChange={(e) => setPatientData({...patientData, emergency: e.target.checked})}
+                className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+              />
+              <span className="text-sm font-medium text-gray-700">Emergency</span>
+            </label>
+          </div>
+
+          <div className="max-w-2xl space-y-6">
+            {/* Name and Email Row */}
+            <div className="flex gap-4">
+              {/* Name - 25% */}
+              <div className="w-1/4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={patientData.name}
+                  onChange={(e) => setPatientData({ ...patientData, name: e.target.value })}
+                  placeholder="Enter name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+                />
+              </div>
+
+              {/* Email - 25% */}
+              <div className="w-1/4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={patientData.email}
+                  onChange={(e) => setPatientData({ ...patientData, email: e.target.value })}
+                  placeholder="Enter email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+                />
+              </div>
+
+              {/* Spacer - 50% blank */}
+              <div className="w-1/2" />
+            </div>
+
+            {/* Phone Number */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+              <input
+                type="text"
+                name="phone"
+                value={patientData.phone}
+                onChange={(e) => setPatientData({...patientData, phone: e.target.value})}
+                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+              />
+            </div>
+
+            {/* Gender */}
+            <div className="flex items-center space-x-4">
+              <label className="block text-sm font-medium text-gray-700 w-20">Gender</label>
+              <div className="flex space-x-4 w-full">
+                {["male", "female", "others"].map((gender) => (
+                  <label
+                    key={gender}
+                    className="flex items-center space-x-2 border border-gray-300 rounded-lg px-3 py-2 w-full max-w-[120px] cursor-pointer focus-within:ring-2 focus-within:ring-green-500"
+                  >
+                    <input
+                      type="radio"
+                      name="gender"
+                      value={gender}
+                      checked={patientData.gender === gender}
+                      onChange={(e) =>
+                        setPatientData({ ...patientData, gender: e.target.value })
+                      }
+                      className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700 capitalize">{gender}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+
+
+            {/* Age */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+              <input
+                type="number"
+                name="age"
+                value={patientData.age}
+                onChange={(e) => setPatientData({...patientData, age: e.target.value})}
+                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+              />
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+              <input
+                type="text"
+                name="address"
+                value={patientData.address}
+                onChange={(e) => setPatientData({...patientData, address: e.target.value})}
+                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+              />
+            </div>
+
+            {/* Department */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+              <select
+                name="department"
+                value={patientData.department}
+                onChange={(e) => setPatientData({...patientData, department: e.target.value, doctor: ''})}
+                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white text-sm"
+              >
+                <option value="">Select Department</option>
+                {Object.keys(departments).map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept.charAt(0).toUpperCase() + dept.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Doctor */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Doctor</label>
+              <select
+                name="doctor"
+                value={patientData.doctor}
+                onChange={(e) => setPatientData({...patientData, doctor: e.target.value})}
+                disabled={!patientData.department}
+                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white disabled:bg-gray-50 disabled:text-gray-500 text-sm"
+              >
+                <option value="">Select available Doctor</option>
+                {patientData.department &&
+                  departments[patientData.department as DepartmentName].map((doctor) => (
+                    <option key={doctor} value={doctor}>{doctor}</option>
+                  ))}
+              </select>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-4">
+              <button
+                type="button"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div className="mt-2.5">
-        <h1 className="text-[16px] leading-[24px] font-regular">Collect patient's name, email, phone number, date of birth, gender, and address. Display created at timestamp. Include a
-        field to indicate if the patient is admitted to emergency, alongside the number of available beds.</h1>
-      </div>
-
-      {/*Emergency checkBox*/}
-        <div className="mt-2.5">
-          <label><input type="checkbox" checked={patientData.emergency}  onChange={(e) => setPatientData({...patientData, emergency: e.target.checked})}/>Emergency</label>
-        </div>
-
-      <form className="mt-0">
-        
-        <div className="w-[50vw] h-[88px] flex gap-x-4 items-center ">
-          {/* Name */}
-          <div className="w-[25vw]">
-            <label>Name</label>
-            <br/>
-            <input type="text" name="name" value={patientData.name} onChange={(e) => setPatientData({...patientData, name: e.target.value})} placeholder="e.g RamBahadur Neupane"  className="border border-gray-400 rounded px-2 py-1 w-full"/>
-          </div>
-
-          {/*email*/}
-          <div className="w-[25vw]">
-            <label>Email</label>
-            <br/>
-            <input type="email" name="email" value={patientData.email} onChange={(e) => setPatientData({...patientData, email: e.target.value})} placeholder="e.g rambahadur@gmail.com"  className="border border-gray-400 rounded px-2 py-1 w-full"/>
-          </div>
-        </div>
-
-        {/* Phone Number*/}
-        <div>
-          <label>Phone Number:</label>
-          <br/>
-          <input type="text" name="phone" value={patientData.phone} onChange={(e) => setPatientData({...patientData, phone: e.target.value})} placeholder="e.g +977 981-2345678"  className="border border-gray-400 rounded px-2 py-1 w-[50vw]"/>
-        </div>
-
-        {/*Gender*/}
-        <div className="mt-2.5 w-full flex items-center gap-6" >
-          <label>Gender:</label>
-          <div className="flex justify-between w-full">
-            <label className="flex items-center gap-2 w-full justify-center"> <input type="radio" name="gender" value = "male" checked={patientData.gender === "male"} onChange={(e) => setPatientData({...patientData, gender: e.target.value})}/>Male</label>
-            <label className="flex items-center gap-2 w-full justify-center"> <input type="radio" name="gender" value = "female" checked={patientData.gender === "female"} onChange={(e) => setPatientData({...patientData, gender: e.target.value})}/>Female</label>
-            <label className="flex items-center gap-2 w-full justify-center">  <input type="radio" name="gender" value = "others" checked={patientData.gender === "others"} onChange={(e) => setPatientData({...patientData, gender: e.target.value})}/>Others</label>
-          </div>
-        </div>
-
-        {/*Age*/}
-        <div className="mt-2.5 w-[50vw]">
-          <label>Age</label>
-          <div className="w-full">  
-            <input type="text" name="age" value={patientData.age}  onChange={(e) => setPatientData({...patientData, age: e.target.value})} placeholder="e.g 32" className="border border-gray-400 rounded px-2 py-1 w-[50vw]"/>
-          </div>  
-        </div>
-
-        {/*Address*/}
-        <div>
-          <label>Address</label>
-          <br/>
-          <input type="text" name="address" value={patientData.address}  onChange={(e) => setPatientData({...patientData, address: e.target.value})} placeholder="e.g 28 kilo, Dhulikhel, Bagmati" className="border border-gray-400 rounded px-2 py-1 w-[50vw]"/>
-        </div>
-
-
-        {/*Department*/}
-        <div>
-          <label>Department</label>
-          <br/>
-          <select name="department" value={patientData.department} onChange={(e) => setPatientData({...patientData, department: e.target.value, doctor: ''})} className="border border-gray-400 rounded px-2 py-1 w-[50vw]">
-            <option value="">Select Department</option>
-              {Object.keys(departments).map((dept) =>(
-                <option key={dept} value={dept}>{dept.charAt(0).toUpperCase() + dept.slice(1)}</option>
-              ))}
-          </select>
-        </div>
-
-        {/*Doctor*/}
-        <div>
-          <label>Doctor</label>
-          <br/>
-          <select name="doctor" value={patientData.doctor} onChange={(e) => setPatientData({...patientData, doctor: e.target.value})} disabled={!patientData.department} className="border border-gray-400 rounded px-2 py-1 w-[50vw]">
-            <option value="">Select avilable Doctor</option>
-            {patientData.department && departments[patientData.department as DepartmentName].map((doctor) =>(
-              <option key={doctor} value={doctor}>{doctor}</option>
-            ))}
-          </select>
-        </div>
-            
-        <div className="mt-6 w-[50vw]">
-          <button type="submit"  className="w-full bg-[#009963] text-white py-2 px-4 rounded-xl hover:bg-[#007f52] transition">
-            Submit
-          </button>
-        </div>   
-
-      </form>
-
     </div>
   );
 }
