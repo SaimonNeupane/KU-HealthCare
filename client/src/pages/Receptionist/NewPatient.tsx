@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Search, User } from "lucide-react";
+import { useState } from "react";
 
 type DepartmentName =
   | "cardiology"
@@ -10,12 +9,12 @@ type DepartmentName =
   | "emergency";
 
 const departments: Record<DepartmentName, string[]> = {
-  cardiology: ["Dr. Smith", "Dr. Patel"],
-  neurology: ["Dr. Brain", "Dr. Watson"],
-  orthopedics: ["Dr. Bones", "Dr. Andrews"],
-  pediatrics: ["Dr. Kids", "Dr. Young"],
-  general: ["Dr. House", "Dr. Adams"],
-  emergency: ["Dr. Rush", "Dr. Speed"],
+  cardiology: ["Dr. Parikchit Sen", "Dr. Keshav Raj Sharma"],
+  neurology: ["Dr. Saimon Neupane", "Dr. Prabesh Sharma"],
+  orthopedics: ["Dr. Risham Raj Byahut", "Dr. Pitambar Chaudhary"],
+  pediatrics: ["Dr. Salon Timilsina", "Dr. Udaya Ojha"],
+  general: ["Dr. Gaurav Bista", "Dr. Shriharsha Acharya"],
+  emergency: ["Dr. Prabesh Ojha", "Dr. Piyush Bhat"],
 };
 
 function NewPatient() {
