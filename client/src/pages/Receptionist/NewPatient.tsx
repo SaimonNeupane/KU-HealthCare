@@ -36,7 +36,7 @@ function NewPatient()
     }
   );
   return(
-    <div className="mx-[10vw] mt-8">
+    <div className="mx-[10vw] mt-4">
       <div className="w-full border border-black rounded-none">
         <h2 className="text-[36px] leading-[45px] font-extrabold">New Patient</h2>
       </div>
@@ -80,9 +80,9 @@ function NewPatient()
         <div className="mt-2.5 w-full flex items-center gap-6" >
           <label>Gender:</label>
           <div className="flex justify-between w-full">
-            <label className="flex items-center gap-2 w-full justify-center"> <input type="radio" name="male" value = "male" checked={patientData.gender === "male"} onChange={(e) => setPatientData({...patientData, gender: e.target.value})}/>Male</label>
-            <label className="flex items-center gap-2 w-full justify-center"> <input type="radio" name="female" value = "female" checked={patientData.gender === "female"} onChange={(e) => setPatientData({...patientData, gender: e.target.value})}/>Female</label>
-            <label className="flex items-center gap-2 w-full justify-center">  <input type="radio" name="others" value = "others" checked={patientData.gender === "others"} onChange={(e) => setPatientData({...patientData, gender: e.target.value})}/>Others</label>
+            <label className="flex items-center gap-2 w-full justify-center"> <input type="radio" name="gender" value = "male" checked={patientData.gender === "male"} onChange={(e) => setPatientData({...patientData, gender: e.target.value})}/>Male</label>
+            <label className="flex items-center gap-2 w-full justify-center"> <input type="radio" name="gender" value = "female" checked={patientData.gender === "female"} onChange={(e) => setPatientData({...patientData, gender: e.target.value})}/>Female</label>
+            <label className="flex items-center gap-2 w-full justify-center">  <input type="radio" name="gender" value = "others" checked={patientData.gender === "others"} onChange={(e) => setPatientData({...patientData, gender: e.target.value})}/>Others</label>
           </div>
         </div>
 
@@ -118,7 +118,7 @@ function NewPatient()
         <div>
           <label>Doctor</label>
           <br/>
-          <select name="doctor" value={patientData.doctor} onChange={(e) => setPatientData({...patientData, department: e.target.value})} disabled={!patientData.department} className="border border-gray-400 rounded px-2 py-1 w-[50vw]">
+          <select name="doctor" value={patientData.doctor} onChange={(e) => setPatientData({...patientData, doctor: e.target.value})} disabled={!patientData.department} className="border border-gray-400 rounded px-2 py-1 w-[50vw]">
             <option value="">Select avilable Doctor</option>
             {patientData.department && departments[patientData.department as DepartmentName].map((doctor) =>(
               <option key={doctor} value={doctor}>{doctor}</option>
