@@ -1,10 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./Layouts/MainLayout";
-import { Navigate } from "react-router";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-// import Receptionist from "./pages/Receptionist";
-import NewPatient from "./pages/Receptionist/NewPatient";
+
+import NewPatient from "./pages/Receptionist/NewPatient.tsx";
+
 function App() {
   return (
     <BrowserRouter>
@@ -13,7 +13,8 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/registration" element={<NewPatient />} />
+
+        <Route path="/receptionist/newpatient" element={<NewPatient />} />
       </Routes>
     </BrowserRouter>
   );
