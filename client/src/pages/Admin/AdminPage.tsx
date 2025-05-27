@@ -1,29 +1,26 @@
-import React from "react";
+// src/pages/AdminPage.tsx
+import { Routes, Route } from 'react-router-dom';
+import Sidebar from '../../components/Sidebar/Sidebar';
+import Dashboard from './DashBoard'
+import DoctorsList from './DoctorsList';
+import PatientsList from './PatientList';
+import Appointments from './Appointment';
+import Receptionists from './Receptionist';
 
-import Sidebar from "../../components/Sidebar/Sidebar"
-import AdminNotification from "../../components/DashBoard/AdminNotification";
-import StatsCards from "../../components/DashBoard/Statcard";
-
-const AdminPage = () => {
+export default function AdminPage() {
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
       <Sidebar />
-
-      {/* Main Content */}
       <main className="flex-1 p-6">
-        <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
-        
-        {/* Stats Cards Section */}
-        <StatsCards />
-
-        {/* Notifications Section */}
-        <div className="mt-6">
-          <AdminNotification />
-        </div>
+        <Routes>
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="doctors" element={<DoctorsList />} />
+          <Route path="patients" element={<PatientsList />} />
+          <Route path="appointments" element={<Appointments />} />
+          <Route path="receptionists" element={<Receptionists />} />
+        </Routes>
       </main>
     </div>
   );
-};
-
-export default AdminPage;
+}
