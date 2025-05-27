@@ -49,3 +49,5 @@ build/
 
 # Optional output of 'npm pack'
 *.tgz
+
+/src/generated/prisma
