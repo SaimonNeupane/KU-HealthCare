@@ -1,7 +1,7 @@
 // src/pages/AdminPage.tsx
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar/Sidebar';
-import Dashboard from './DashBoard'
+import AdminDashboard from './DashBoard'
 import DoctorsList from './DoctorsList';
 import PatientsList from './PatientList';
 import Appointments from './Appointment';
@@ -13,8 +13,8 @@ export default function AdminPage() {
       <Sidebar />
       <main className="flex-1 p-6">
         <Routes>
-          <Route index element={<Dashboard />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="doctors" element={<DoctorsList />} />
           <Route path="patients" element={<PatientsList />} />
           <Route path="appointments" element={<Appointments />} />
