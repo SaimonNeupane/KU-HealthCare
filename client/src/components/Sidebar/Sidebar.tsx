@@ -10,11 +10,7 @@ import {
 
 export default function Sidebar() {
   return (
-    <aside className="w-64 min-h-screen bg-white shadow-md p-6 flex flex-col">
-      {/* KU Health Care Title */}
-      <h1 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
-        <span className="text-green-600 text-xl">✚</span> KU Health Care
-      </h1>
+    <aside className="w-full min-h-screen bg-white shadow-md p-6 flex flex-col">
 
       {/* Admin Profile Section */}
       <div className="flex items-center gap-3 mb-10">

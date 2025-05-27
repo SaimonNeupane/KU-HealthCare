@@ -10,7 +10,10 @@ import Receptionists from './Receptionist';
 export default function AdminPage() {
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
+      <div className='w-[25%] bg-gray-200 p-4'>
+        <Sidebar />
+      </div>
+             
       <main className="flex-1 p-6">
         <Routes>
           <Route index element={<AdminDashboard />} />
