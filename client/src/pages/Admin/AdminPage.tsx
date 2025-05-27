@@ -1,4 +1,4 @@
-// src/pages/AdminPage.tsx
+
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import AdminDashboard from './DashBoard'
