@@ -1,17 +1,18 @@
-import React from 'react';
-
-
 import StatsCards from '../../components/DashBoard/Statcard';
 import AdminNotification from '../../components/DashBoard/AdminNotification';
 
-export default function Dashboard() {
+export default function DashBoard() {
   return (
-    <>
-      <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold text-gray-800">Dashboard</h2>
+      <h3 style={{ color: '#6C6C6C' }}>Overview of hospital operations</h3>
+
+      {/* Test each component one by one */}
+      <div>Testing StatsCards:</div>
       <StatsCards />
-      <div className="mt-6">
-        <AdminNotification />
-      </div>
-    </>
+      
+      {/* Comment out AdminNotification for now */}
+      {/* <AdminNotification /> */}
+    </div>
   );
 }
