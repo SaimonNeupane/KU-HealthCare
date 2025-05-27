@@ -5,6 +5,8 @@ import Signup from "./pages/Signup";
 
 import NewPatient from "./pages/Receptionist/NewPatient.tsx";
 import Dashboard from "./pages/Receptionist/DashBoard.tsx";
+import Notification from "./pages/Doctor/Notification.tsx";
+import AdminPage from "./pages/Admin/AdminPage.tsx";
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
 
         <Route path="/receptionist/newpatient" element={<NewPatient />} />
         <Route path="/receptionist/dashboard" element={<Dashboard />} />
+        <Route path= "/doctor" element={< Notification/>}/>
+        <Route path= "/admin" element={< AdminPage/>}/>
       </Routes>
     </BrowserRouter>
   );
