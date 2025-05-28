@@ -1,33 +1,35 @@
-import { FaUser, FaUserMd, FaFileAlt } from "react-icons/fa";
+import {  FaUserMd, FaFileAlt } from "react-icons/fa";
+import { IoManOutline } from "react-icons/io5";
+
 
 export default function Notifications() {
   const notifications = [
     {
       id: 1,
-      icon: <FaUser />,
+      icon: 'patient.svg',
       title: "New patient registered: John Doe",
       subtitle: "Auto-assigned Patient ID: 12345",
       time: "2 min",
-      bgColor: "bg-green-100",
-      iconColor: "text-green-600"
+      bgColor: '#BBF7D0',
+      iconColor: "text-black-600"
     },
     {
       id: 2,
-      icon: <FaUserMd />,
+      icon: 'bed.svg',
       title: "Doctor assigned to patient: Jane Smith",
       subtitle: "Assigned to Dr. Adams",
       time: "5 min",
-      bgColor: "bg-green-100",
-      iconColor: "text-green-600"
+      bgColor: '#BBF7D0',
+      iconColor: "text-black-600"
     },
     {
       id: 3,
-      icon: <FaFileAlt />,
+      icon: 'report.svg',
       title: "Lab report Arrived: Parikchit Sen",
       subtitle: "Assigned to Dr. Adams",
       time: "20 min",
-      bgColor: "bg-green-100",
-      iconColor: "text-green-600"
+      bgColor: '#BBF7D0',
+      iconColor: "text-black-600"
     }
   ];
 
@@ -37,8 +39,8 @@ export default function Notifications() {
       <div className="space-y-4">
         {notifications.map((notification) => (
           <div key={notification.id} className="flex items-start gap-4">
-            <div className={`p-2 rounded-full ${notification.bgColor} ${notification.iconColor}`}>
-              {notification.icon}
+            <div className={`p-2 rounded-full  bg-[${notification.bgColor}] ${notification.iconColor}`}>
+              <img src={`/${notification.icon}`} alt="logo" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-800">{notification.title}</p>

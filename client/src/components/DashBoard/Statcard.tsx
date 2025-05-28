@@ -42,7 +42,7 @@ export default function StatsCards() {
           className="bg-white p-5 rounded-xl shadow hover:shadow-md transition"
         >
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-100 text-green-700 rounded-full text-xl">
+            <div className="p-3 bg-[#BBF7D0] text-black-700 rounded-full text-xl">
               {stat.icon}
             </div>
             <div>
