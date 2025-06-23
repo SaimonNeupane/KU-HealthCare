@@ -42,20 +42,20 @@ function Dashboard() {
   };
 
   return (
-    <div style={{ 
-      backgroundColor: "#f8fafc", 
-      minHeight: "100vh", 
-      padding: "40px 20px", 
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" 
+    <div style={{
+      backgroundColor: "#f8fafc",
+      minHeight: "100vh",
+      padding: "40px 20px",
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
     }}>
       {/* Main Container */}
-      <div style={{ 
-        maxWidth: "1000px", 
+      <div style={{
+        maxWidth: "1000px",
         margin: "0 auto"
       }}>
-        
+
         {/* Toggle Buttons */}
-        <div style={{ 
+        <div style={{
           display: "flex",
           marginBottom: "24px"
         }}>
@@ -96,9 +96,9 @@ function Dashboard() {
         </div>
 
         {/* Table Container */}
-        <div style={{ 
-          backgroundColor: "white", 
-          borderRadius: "16px", 
+        <div style={{
+          backgroundColor: "white",
+          borderRadius: "16px",
           padding: "24px",
           boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
           border: "1px solid #e2e8f0"
@@ -107,52 +107,52 @@ function Dashboard() {
           {/* Doctors Table */}
           {activeSection === "doctor" && (
             <div style={{ overflowX: "auto" }}>
-              <table style={{ 
-                width: "100%", 
+              <table style={{
+                width: "100%",
                 borderCollapse: "collapse",
                 fontSize: "14px"
               }}>
                 <thead>
                   <tr style={{ backgroundColor: "#f8fafc" }}>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
                     }}>
                       Doctor's Name
                     </th>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
                     }}>
                       Working Hours
                     </th>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
                     }}>
                       Email
                     </th>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
                     }}>
                       Department
                     </th>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
@@ -163,30 +163,30 @@ function Dashboard() {
                 </thead>
                 <tbody>
                   {doctors.map((doc, index) => (
-                    <tr key={doc.id} style={{ 
+                    <tr key={doc.id} style={{
                       borderBottom: "1px solid #f1f5f9",
                       backgroundColor: index % 2 === 0 ? "#ffffff" : "#fafbfc"
                     }}>
-                      <td style={{ 
+                      <td style={{
                         padding: "16px 12px",
                         fontWeight: "500",
                         color: "#1f2937"
                       }}>
                         {doc.name}
                       </td>
-                      <td style={{ 
+                      <td style={{
                         padding: "16px 12px",
                         color: "#6b7280"
                       }}>
                         {doc.workingHours}
                       </td>
-                      <td style={{ 
+                      <td style={{
                         padding: "16px 12px",
                         color: "#6b7280"
                       }}>
                         {doc.email}
                       </td>
-                      <td style={{ 
+                      <td style={{
                         padding: "16px 12px",
                         color: "#6b7280"
                       }}>
@@ -207,52 +207,52 @@ function Dashboard() {
           {/* Patients Table */}
           {activeSection === "patient" && (
             <div style={{ overflowX: "auto" }}>
-              <table style={{ 
-                width: "100%", 
+              <table style={{
+                width: "100%",
                 borderCollapse: "collapse",
                 fontSize: "14px"
               }}>
                 <thead>
                   <tr style={{ backgroundColor: "#f8fafc" }}>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
                     }}>
                       Patient's Name
                     </th>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
                     }}>
                       Room Number
                     </th>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
                     }}>
                       Bed Assignment
                     </th>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
                     }}>
                       Treatment Status
                     </th>
-                    <th style={{ 
-                      padding: "16px 12px", 
-                      textAlign: "left", 
+                    <th style={{
+                      padding: "16px 12px",
+                      textAlign: "left",
                       fontWeight: "600",
                       color: "#374151",
                       borderBottom: "2px solid #e5e7eb"
@@ -263,18 +263,18 @@ function Dashboard() {
                 </thead>
                 <tbody>
                   {patients.map((patient, index) => (
-                    <tr key={patient.id} style={{ 
+                    <tr key={patient.id} style={{
                       borderBottom: "1px solid #f1f5f9",
                       backgroundColor: index % 2 === 0 ? "#ffffff" : "#fafbfc"
                     }}>
-                      <td style={{ 
+                      <td style={{
                         padding: "16px 12px",
                         fontWeight: "500",
                         color: "#1f2937"
                       }}>
                         {patient.name}
                       </td>
-                      <td style={{ 
+                      <td style={{
                         padding: "16px 12px",
                         color: "#6b7280"
                       }}>

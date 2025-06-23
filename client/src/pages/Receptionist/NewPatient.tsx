@@ -39,7 +39,7 @@ function NewPatient() {
           <div className="mb-8">
             <h1 className="text-2xl font-semibold text-gray-900 mb-2">Register New Patient</h1>
             <p className="text-gray-600 text-sm leading-relaxed max-w-2xl">
-              Collect patient's name, email, phone number, date of birth, gender, and address. Display created at timestamp. Include a
+              Collect patient's name, email, phone number, age, gender, and address. Display created at timestamp. Include a
               field to indicate if the patient is admitted to emergency, alongside the number of available beds.
             </p>
           </div>
@@ -190,10 +190,10 @@ function NewPatient() {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4">
+            <div className="pt-4 ">
               <button
                 type="button"
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="w-[50%] bg-[#009963] hover:bg-green-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
               >
                 Submit
               </button>
