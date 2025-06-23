@@ -15,10 +15,10 @@ export const login: any = AsyncError(async (req: Request, res: Response, next: N
     const found = await prisma.user.findFirst({ where: { username } })
     if (found?.password === password) {
         if (found?.role === role) {
-            let token
-            if (found) {
-                token = jwt.sign({ username, role }, process.env.JWT_SECRET_KEY!, { expiresIn: '1h' })
-            }
+            
+            
+              const  token = jwt.sign({ username, role }, process.env.JWT_SECRET_KEY!, { expiresIn: '1h' })
+            
             return res.status(200).json({
                 status: "Success",
                 statusCode: 200,
