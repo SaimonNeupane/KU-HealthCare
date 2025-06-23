@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -15,13 +8,132 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  name String 
-  email String?
+  user_id               String         @id @default(uuid())
+  username              String         @db.VarChar(50)
+  email                 String         @db.VarChar(50)
+  password              String         @db.VarChar(16)
+  role                  String         @db.VarChar(20)
+  created_at            DateTime       @default(now())
+  labAssistant          LabAssistant?
+  receptionist          Receptionist?
+  doctor                Doctor?
+  sentNotifications     Notification[] @relation("NotificationSender")
+  receivedNotifications Notification[] @relation("NotificationReceiver")
 }
 
-model Recfijha{
- id Int @id @default(autoincrement())
-  name String 
-  email String?
+model Department {
+  department_id String   @id @default(uuid())
+  name          String   @db.VarChar(20)
+  description   String   @db.Text()
+  created_at    DateTime @default(now())
+  doctor        Doctor[]
+  Room          Room[]
+}
+
+model Room {
+  room_id      String     @id @default(uuid())
+  room_number  Int
+  status       String
+  created_at   DateTime   @default(now())
+  departmentId String //Foreign Key
+  department   Department @relation(fields: [departmentId], references: [department_id])
+  Doctor       Doctor[]
+}
+
+model LabAssistant {
+  lab_assistant_id String    @id @default(uuid())
+  first_name       String    @db.VarChar(20)
+  last_name        String    @db.VarChar(20)
+  created_at       DateTime  @default(now())
+  userId           String    @unique //Foreign Key
+  user             User      @relation(fields: [userId], references: [user_id])
+  LabTest          LabTest[]
+}
+
+model Receptionist {
+  receptionist_id String   @id @default(uuid())
+  first_name      String   @db.VarChar(20)
+  last_name       String   @db.VarChar(20)
+  created_at      DateTime @default(now())
+  userId          String   @unique //Foreign Key
+  user            User     @relation(fields: [userId], references: [user_id])
+}
+
+model Doctor {
+  doctor_id      String     @id @default(uuid())
+  first_name     String     @db.VarChar(20)
+  last_name      String     @db.VarChar(20)
+  specialization String     @db.VarChar(20)
+  is_online      Boolean
+  departmentId   String     @unique //Foreign Key
+  department     Department @relation(fields: [departmentId], references: [department_id])
+  created_at     DateTime   @default(now())
+  userId         String     @unique //Foreign Key
+  user           User       @relation(fields: [userId], references: [user_id])
+  roomId         String
+  room           Room       @relation(fields: [roomId], references: [room_id])
+  LabTest        LabTest?
+}
+
+model Notification {
+  notification_id   String   @id @default(uuid())
+  recipient_user_id String
+  sender_user_id    String
+  recipient         User     @relation("NotificationReceiver", fields: [recipient_user_id], references: [user_id])
+  sender            User     @relation("NotificationSender", fields: [sender_user_id], references: [user_id])
+  is_read           Boolean  @default(false)
+  created_at        DateTime @default(now())
+  userUser_id       String?
+}
+
+model Bed {
+  bed_id     String    @id @default(uuid())
+  bed_number Int       @default(autoincrement())
+  status     String
+  created_at DateTime  @default(now())
+  Patient    Patient[]
+}
+
+model Patient {
+  patient_id     String        @id @default(uuid())
+  first_name     String        @db.VarChar(20)
+  last_name      String        @db.VarChar(20)
+  age            Int
+  gender         String        @db.VarChar(10)
+  contact_number String        @db.VarChar(10)
+  address        String        @db.Text
+  bedId          String //Foreign Key
+  bed            Bed           @relation(fields: [bedId], references: [bed_id])
+  Appointment    Appointment[]
+  created_at     DateTime      @default(now())
+  LabTest        LabTest[]
+}
+
+model Appointment {
+  appointment_id   String    @id @default(uuid())
+  patientId        String //Foreign Key
+  doctorId         String
+  roomId           String
+  patient          Patient   @relation(fields: [patientId], references: [patient_id])
+  appointment_time DateTime
+  status           String    @db.VarChar()
+  is_emergency     Boolean
+  created_at       DateTime  @default(now())
+  LabTest          LabTest[]
+}
+
+model LabTest {
+  test_id              String       @id @default(uuid())
+  appointmentId        String //Foreign Key
+  appointment          Appointment  @relation(fields: [appointmentId], references: [appointment_id])
+  patientId            String
+  patient              Patient      @relation(fields: [patientId], references: [patient_id])
+  requesting_doctor_id String       @unique
+  doctor               Doctor       @relation(fields: [requesting_doctor_id], references: [doctor_id])
+  labAssistantId       String
+  labAssistant         LabAssistant @relation(fields: [labAssistantId], references: [lab_assistant_id])
+  status               String
+  completion_time      DateTime
+  result               String
+  created_at           DateTime     @default(now())
 }
