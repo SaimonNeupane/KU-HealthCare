@@ -1,4 +1,3 @@
-import { error } from "console";
 
 class HttpError extends  Error{
     statusCode:number
