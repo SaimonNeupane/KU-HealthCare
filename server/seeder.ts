@@ -93,6 +93,8 @@ async function main() {
       departmentId: generalDept.department_id,
       userId: prabeshUser.user_id,
       roomId: room1.room_id,
+      workingFrom:"9",
+      workingTo:"4"
     },
   })
 
@@ -105,6 +107,8 @@ async function main() {
       departmentId: generalDept.department_id,
       userId: keshavUser.user_id,
       roomId: room1.room_id,
+      workingFrom:"9",
+      workingTo:"4"
     },
   })
 
@@ -117,11 +121,136 @@ async function main() {
       departmentId: generalDept.department_id,
       userId: parikchitUser.user_id,
       roomId: room1.room_id,
+      workingFrom:"9",
+      workingTo:"4"
     },
   })
 
-  console.log("Database seeded successfully.")
+ // Create new users
+const anishaUser = await prisma.user.create({
+  data: {
+    username: "anisha_khadka",
+    email: "anisha@example.com",
+    password: "test1234",
+    role: "lab_assistant",
+  },
+})
+
+const bijayUser = await prisma.user.create({
+  data: {
+    username: "bijay_gurung",
+    email: "bijay@example.com",
+    password: "test1234",
+    role: "doctor",
+  },
+})
+
+const kabitaUser = await prisma.user.create({
+  data: {
+    username: "kabita_basnet",
+    email: "kabita@example.com",
+    password: "test1234",
+    role: "receptionist",
+  },
+})
+
+// Create new Department & Room
+const neuroDept = await prisma.department.create({
+  data: {
+    name: "Neurology",
+    description: "Brain and nervous system related care",
+  },
+})
+
+const room2 = await prisma.room.create({
+  data: {
+    room_number: 202,
+    status: "available",
+    departmentId: neuroDept.department_id,
+  },
+})
+
+// Create Lab Assistant
+const anishaAssistant = await prisma.labAssistant.create({
+  data: {
+    first_name: "Anisha",
+    last_name: "Khadka",
+    userId: anishaUser.user_id,
+  },
+})
+
+// Create Receptionist
+await prisma.receptionist.create({
+  data: {
+    first_name: "Kabita",
+    last_name: "Basnet",
+    userId: kabitaUser.user_id,
+  },
+})
+
+// Create Doctor
+const bijayDoctor = await prisma.doctor.create({
+  data: {
+    first_name: "Bijay",
+    last_name: "Gurung",
+    specialization: "Neurology",
+    is_online: true,
+    departmentId: neuroDept.department_id,
+    userId: bijayUser.user_id,
+    roomId: room2.room_id,
+    workingFrom: "10",
+    workingTo: "5",
+  },
+})
+
+// Create a Bed & Patient
+const bed2 = await prisma.bed.create({
+  data: {
+    status: "occupied",
+  },
+})
+
+const patient2 = await prisma.patient.create({
+  data: {
+    first_name: "Sujan",
+    last_name: "Thapa",
+    age: 33,
+    gender: "Male",
+    contact_number: "9811223344",
+    address: "Pokhara",
+    bedId: bed2.bed_id,
+  },
+})
+
+// Create an Appointment
+const appointment2 = await prisma.appointment.create({
+  data: {
+    patientId: patient2.patient_id,
+    doctorId: bijayUser.user_id,
+    roomId: room2.room_id,
+    appointment_time: new Date(),
+    status: "scheduled",
+    is_emergency: false,
+  },
+})
+
+// Create LabTest
+await prisma.labTest.create({
+  data: {
+    appointmentId: appointment2.appointment_id,
+    patientId: patient2.patient_id,
+    requesting_doctor_id: bijayDoctor.doctor_id,
+    labAssistantId: anishaAssistant.lab_assistant_id,
+    status: "pending",
+    completion_time: new Date(Date.now() + 2 * 3600000), // 2 hours later
+    result: "Not available yet",
+  },
+})
+
+console.log("✅ Extra dummy users, doctor, lab assistant, patient, and labtest seeded.")
+
 }
+
 
 main()
   .then(async () => {

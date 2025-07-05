@@ -2,8 +2,7 @@ import express, { Express, NextFunction, Request, Response } from "express";
 import HttpError from "./Errors/httpError";
 import GlobalError from "./Errors/globalError";
 import LoginRoutes from './routes/loginRoute'
-import assistantRoutes from './routes/labAssistantRoute'
-import smallCheck from './routes/assistant'
+import RecepRoutes from './routes/Receptionists/receptionistRoutes'
 import bodyParser, { json } from "body-parser";
 
 
@@ -14,14 +13,9 @@ app.use(bodyParser.json())
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server is running");
 });
-app.get("/lab", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server is running");
-});
-
-
 
 app.use(`/user`,LoginRoutes)
-
+app.use(`/receptionist`,RecepRoutes)
 
 app.use((req:Request,res:Response,next:NextFunction):any=>{
   return res.status(400).json({

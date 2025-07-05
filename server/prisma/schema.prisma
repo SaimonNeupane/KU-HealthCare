@@ -65,12 +65,14 @@ model Doctor {
   last_name      String     @db.VarChar(20)
   specialization String     @db.VarChar(20)
   is_online      Boolean
-  departmentId   String     
+  departmentId   String
   department     Department @relation(fields: [departmentId], references: [department_id])
   created_at     DateTime   @default(now())
   userId         String     @unique //Foreign Key
   user           User       @relation(fields: [userId], references: [user_id])
   roomId         String
+  workingFrom    String     @db.VarChar(5)
+  workingTo      String     @db.VarChar(5)
   room           Room       @relation(fields: [roomId], references: [room_id])
   LabTest        LabTest?
 }
