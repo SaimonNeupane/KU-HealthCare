@@ -1,10 +1,11 @@
 import express, { Express, NextFunction, Request, Response } from "express";
 import GlobalError from "./Errors/globalError";
 
-import LoginRoutes from './routes/loginRoute'
-import RecepRoutes from './routes/Receptionists/receptionistRoutes'
+import LoginRoutes from "./routes/loginRoute";
+import RecepRoutes from "./routes/Receptionists/receptionistRoutes";
 
 import assistantRoutes from "./routes/labAssistantRoute";
+import doctorRoutes from "./routes/doctorRoute";
 
 import bodyParser, { json } from "body-parser";
 
@@ -16,14 +17,13 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server is running");
 });
 
-app.use(`/receptionist`,RecepRoutes)
-
+app.use(`/receptionist`, RecepRoutes);
 
 app.use(`/user`, LoginRoutes);
 app.use("/lab", assistantRoutes);
+app.use("/doctor", doctorRoutes);
 
 app.use((req: Request, res: Response, next: NextFunction): any => {
-
   return res.status(400).json({
     status: "Fail",
     statusCode: 404,
