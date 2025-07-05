@@ -14,30 +14,31 @@ model User {
   password              String         @db.VarChar(16)
   role                  String         @db.VarChar(20)
   created_at            DateTime       @default(now())
-  labAssistant          LabAssistant?
-  receptionist          Receptionist?
   doctor                Doctor?
-  sentNotifications     Notification[] @relation("NotificationSender")
+  labAssistant          LabAssistant?
   receivedNotifications Notification[] @relation("NotificationReceiver")
+  sentNotifications     Notification[] @relation("NotificationSender")
+  receptionist          Receptionist?
 }
 
 model Department {
   department_id String   @id @default(uuid())
   name          String   @db.VarChar(20)
-  description   String   @db.Text()
+  description   String
   created_at    DateTime @default(now())
   doctor        Doctor[]
   Room          Room[]
 }
 
 model Room {
-  room_id      String     @id @default(uuid())
+  room_id      String        @id @default(uuid())
   room_number  Int
   status       String
-  created_at   DateTime   @default(now())
-  departmentId String //Foreign Key
-  department   Department @relation(fields: [departmentId], references: [department_id])
+  created_at   DateTime      @default(now())
+  departmentId String
+  Appointment  Appointment[]
   Doctor       Doctor[]
+  department   Department    @relation(fields: [departmentId], references: [department_id])
 }
 
 model LabAssistant {
@@ -45,7 +46,7 @@ model LabAssistant {
   first_name       String    @db.VarChar(20)
   last_name        String    @db.VarChar(20)
   created_at       DateTime  @default(now())
-  userId           String    @unique //Foreign Key
+  userId           String    @unique
   user             User      @relation(fields: [userId], references: [user_id])
   LabTest          LabTest[]
 }
@@ -55,7 +56,7 @@ model Receptionist {
   first_name      String   @db.VarChar(20)
   last_name       String   @db.VarChar(20)
   created_at      DateTime @default(now())
-  userId          String   @unique //Foreign Key
+  userId          String   @unique
   user            User     @relation(fields: [userId], references: [user_id])
 }
 
@@ -66,14 +67,14 @@ model Doctor {
   specialization String     @db.VarChar(20)
   is_online      Boolean
   departmentId   String
-  department     Department @relation(fields: [departmentId], references: [department_id])
   created_at     DateTime   @default(now())
-  userId         String     @unique //Foreign Key
-  user           User       @relation(fields: [userId], references: [user_id])
+  userId         String     @unique
   roomId         String
   workingFrom    String     @db.VarChar(5)
   workingTo      String     @db.VarChar(5)
+  department     Department @relation(fields: [departmentId], references: [department_id])
   room           Room       @relation(fields: [roomId], references: [room_id])
+  user           User       @relation(fields: [userId], references: [user_id])
   LabTest        LabTest?
 }
 
@@ -81,11 +82,11 @@ model Notification {
   notification_id   String   @id @default(uuid())
   recipient_user_id String
   sender_user_id    String
-  recipient         User     @relation("NotificationReceiver", fields: [recipient_user_id], references: [user_id])
-  sender            User     @relation("NotificationSender", fields: [sender_user_id], references: [user_id])
   is_read           Boolean  @default(false)
   created_at        DateTime @default(now())
   userUser_id       String?
+  recipient         User     @relation("NotificationReceiver", fields: [recipient_user_id], references: [user_id])
+  sender            User     @relation("NotificationSender", fields: [sender_user_id], references: [user_id])
 }
 
 model Bed {
@@ -103,39 +104,40 @@ model Patient {
   age            Int
   gender         String        @db.VarChar(10)
   contact_number String        @db.VarChar(10)
-  address        String        @db.Text
-  bedId          String //Foreign Key
-  bed            Bed           @relation(fields: [bedId], references: [bed_id])
-  Appointment    Appointment[]
+  address        String
+  bedId          String
   created_at     DateTime      @default(now())
+  Appointment    Appointment[]
   LabTest        LabTest[]
+  bed            Bed           @relation(fields: [bedId], references: [bed_id])
 }
 
 model Appointment {
   appointment_id   String    @id @default(uuid())
-  patientId        String //Foreign Key
+  patientId        String
   doctorId         String
   roomId           String
-  patient          Patient   @relation(fields: [patientId], references: [patient_id])
   appointment_time DateTime
-  status           String    @db.VarChar()
+  status           String    @db.VarChar
   is_emergency     Boolean
   created_at       DateTime  @default(now())
+  patient          Patient   @relation(fields: [patientId], references: [patient_id])
+  Room             Room      @relation(fields: [roomId], references: [room_id])
   LabTest          LabTest[]
 }
 
 model LabTest {
   test_id              String       @id @default(uuid())
-  appointmentId        String //Foreign Key
-  appointment          Appointment  @relation(fields: [appointmentId], references: [appointment_id])
+  appointmentId        String
   patientId            String
-  patient              Patient      @relation(fields: [patientId], references: [patient_id])
   requesting_doctor_id String       @unique
-  doctor               Doctor       @relation(fields: [requesting_doctor_id], references: [doctor_id])
   labAssistantId       String
-  labAssistant         LabAssistant @relation(fields: [labAssistantId], references: [lab_assistant_id])
   status               String
   completion_time      DateTime
   result               String
   created_at           DateTime     @default(now())
+  appointment          Appointment  @relation(fields: [appointmentId], references: [appointment_id])
+  labAssistant         LabAssistant @relation(fields: [labAssistantId], references: [lab_assistant_id])
+  patient              Patient      @relation(fields: [patientId], references: [patient_id])
+  doctor               Doctor       @relation(fields: [requesting_doctor_id], references: [doctor_id])
 }
