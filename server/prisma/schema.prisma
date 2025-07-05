@@ -31,13 +31,14 @@ model Department {
 }
 
 model Room {
-  room_id      String     @id @default(uuid())
+  room_id      String        @id @default(uuid())
   room_number  Int
   status       String
-  created_at   DateTime   @default(now())
+  created_at   DateTime      @default(now())
   departmentId String //Foreign Key
-  department   Department @relation(fields: [departmentId], references: [department_id])
+  department   Department    @relation(fields: [departmentId], references: [department_id])
   Doctor       Doctor[]
+  Appointment  Appointment[]
 }
 
 model LabAssistant {
@@ -117,6 +118,7 @@ model Appointment {
   doctorId         String
   roomId           String
   patient          Patient   @relation(fields: [patientId], references: [patient_id])
+  room             Room      @relation(fields: [roomId], references: [room_id])
   appointment_time DateTime
   status           String    @db.VarChar()
   is_emergency     Boolean
