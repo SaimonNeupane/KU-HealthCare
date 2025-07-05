@@ -7,6 +7,7 @@ import Dashboard from "./pages/Receptionist/DashBoard.tsx";
 import Notification from "./pages/Doctor/Notification.tsx";
 import AdminPage from "./pages/Admin/AdminPage.tsx";
 import MyPatients from "./pages/Doctor/MyPatients.tsx";
+import LabReports from "./pages/Doctor/LabReports.tsx";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Route path="/receptionist/dashboard" element={<Dashboard />} />
       <Route path="/doctorNotification" element={<Notification />} />
       <Route path="/doctorMyPatients" element={<MyPatients />} />
+      <Route path="/doctorLabReports" element={<LabReports />} />
 
       {/* Fix this line - remove the /* */}
       <Route path="/admin" element={<AdminPage />} />

@@ -1,4 +1,84 @@
 import { useState } from "react";
+import { FaSearch, FaExternalLinkAlt, FaCalendarAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
+const Header: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isActive, setIsActive] = useState("2");
+  const navigate = useNavigate();
+  const handleChange = (a: string) => {
+    setIsActive(a);
+  };
+
+  return (
+    <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+      <div className="flex items-center justify-between">
+        {/* Left Side - Logo and Navigation */}
+        <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center">
+              <span className="text-white font-bold text-sm">◆</span>
+            </div>
+            <span className="text-gray-900 font-semibold text-lg">
+              KU Health Care
+            </span>
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className="flex items-center space-x-4">
+            <button
+              className={`flex items-center space-x-2 px-4 py-2 ${
+                isActive == "1" ? " bg-green-900" : "bg-white"
+              } text-gray-600 rounded-full font-medium hover:bg-white-900 transition-colors`}
+              onClick={() => {
+                handleChange("1");
+                navigate("/receptionist/dashboard");
+              }}
+            >
+              <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                <div className={`w-2 h-2  rounded-full`}></div>
+              </div>
+              <span>Dashboard</span>
+            </button>
+
+            <button
+              onClick={() => {
+                handleChange("2");
+                navigate("/receptionist/newpatient");
+              }}
+              className={`flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-white-900 transition-colors ${
+                isActive == "2"
+                  ? "bg-green-900 rounded-full text-white"
+                  : "bg-white"
+              }`}
+            >
+              <FaCalendarAlt className="w-4 h-4" />
+              <span className="font-medium">Register Patient</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Right Side - Search and Export */}
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors w-64"
+            />
+          </div>
+
+          <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
+            <FaExternalLinkAlt className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+};
 
 type DepartmentName =
   | "cardiology"
@@ -32,16 +112,19 @@ function NewPatient() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       {/* Main Content */}
-      <div className="max-w-3xl mx-auto px-6 py-8">
+      <div className="max-w-3xl mx-auto px-6 py-2">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <div className="mb-8">
             <h1 className="text-2xl font-semibold text-gray-900 mb-2">
               Register New Patient
             </h1>
             <p className="text-gray-600 text-sm leading-relaxed max-w-2xl">
-              Collect patient's name, email, phone number, date of birth, gender, and address. Display created at timestamp. Include a
-              field to indicate if the patient is admitted to emergency, alongside the number of available beds.
+              Collect patient's name, email, phone number, date of birth,
+              gender, and address. Display created at timestamp. Include a field
+              to indicate if the patient is admitted to emergency, alongside the
+              number of available beds.
             </p>
           </div>
 
