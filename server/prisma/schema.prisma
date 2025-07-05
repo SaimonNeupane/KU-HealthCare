@@ -65,7 +65,7 @@ model Doctor {
   last_name      String     @db.VarChar(20)
   specialization String     @db.VarChar(20)
   is_online      Boolean
-  departmentId   String     @unique //Foreign Key
+  departmentId   String     
   department     Department @relation(fields: [departmentId], references: [department_id])
   created_at     DateTime   @default(now())
   userId         String     @unique //Foreign Key
