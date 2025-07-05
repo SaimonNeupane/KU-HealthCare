@@ -31,15 +31,14 @@ model Department {
 }
 
 model Room {
-  room_id     String   @id @default(uuid())
-  room_number Int
-  status      String
-  created_at  DateTime @default(now())
-
-  departmentId String //Foreign Key
-  department   Department    @relation(fields: [departmentId], references: [department_id])
-  Doctor       Doctor[]
+  room_id      String        @id @default(uuid())
+  room_number  Int
+  status       String
+  created_at   DateTime      @default(now())
+  departmentId String
   Appointment  Appointment[]
+  Doctor       Doctor[]
+  department   Department    @relation(fields: [departmentId], references: [department_id])
 }
 
 model LabAssistant {
@@ -114,18 +113,16 @@ model Patient {
 }
 
 model Appointment {
-  appointment_id String @id @default(uuid())
-  patientId      String
-  doctorId       String
-  roomId         String
-
-  patient          Patient   @relation(fields: [patientId], references: [patient_id])
-  room             Room      @relation(fields: [roomId], references: [room_id])
+  appointment_id   String    @id @default(uuid())
+  patientId        String
+  doctorId         String
+  roomId           String
   appointment_time DateTime
   status           String    @db.VarChar
   is_emergency     Boolean
   created_at       DateTime  @default(now())
-  Room             Room      @relation(fields: [roomId], references: [room_id])
+  patient          Patient   @relation(fields: [patientId], references: [patient_id])
+  room             Room      @relation(fields: [roomId], references: [room_id])
   LabTest          LabTest[]
 }
 
