@@ -24,7 +24,7 @@ export const PatientDetails: any = async (req: Request, res: Response) => {
       Appointment: {
         select: {
           appointment_time: true,
-          Room: {
+          room: {
             select: {
               room_number: true,
             },
