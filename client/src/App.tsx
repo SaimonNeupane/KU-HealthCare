@@ -18,11 +18,14 @@ function App() {
       <Route path="/signup" element={<Signup />} />
 
       <Route path="/receptionist/newpatient" element={<NewPatient />} />
-      <Route path="/receptionist" element={<Navigate to='/receptionist/dashboard' />} />
+      <Route
+        path="/receptionist"
+        element={<Navigate to="/receptionist/dashboard" />}
+      />
       <Route path="/receptionist/dashboard" element={<Dashboard />} />
       <Route path="/doctorNotification" element={<Notification />} />
       <Route path="/doctorMyPatients" element={<MyPatients />} />
-      <Route path="/doctorLabReports" element={<LabReports />} />
+      <Route path="/doctorLabreports" element={<LabReports />} />
 
       {/* Fix this line - remove the /* */}
       <Route path="/admin" element={<AdminPage />} />
