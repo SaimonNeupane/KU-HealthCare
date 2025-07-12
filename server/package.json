@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon --exec ts-node src/index.ts",
-    "seeder":"ts-node seeder.ts"
+    "seeder": "ts-node seeder.ts"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +17,7 @@
     "@types/dotenv": "^8.2.3",
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^22.16.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.8.2",
@@ -28,6 +29,7 @@
     "body-parser": "^2.2.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0"
   }
 }
