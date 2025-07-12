@@ -1,5 +1,4 @@
-import React from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from "lucide-react";
 
 export default function DoctorsList() {
   const doctors = [
@@ -10,7 +9,7 @@ export default function DoctorsList() {
       email: "brooklyn@gmail.com",
       department: "Cardiology",
       specialization: "Heart Specialist",
-      sex: "Female"
+      sex: "Female",
     },
     {
       id: 2,
@@ -19,7 +18,7 @@ export default function DoctorsList() {
       email: "kristinw@gmail.com",
       department: "Neurology",
       specialization: "Brain Specialist",
-      sex: "Female"
+      sex: "Female",
     },
     {
       id: 3,
@@ -28,7 +27,7 @@ export default function DoctorsList() {
       email: "jacob@gmail.com",
       department: "Orthopedics",
       specialization: "Bone Specialist",
-      sex: "Male"
+      sex: "Male",
     },
     {
       id: 4,
@@ -37,7 +36,7 @@ export default function DoctorsList() {
       email: "cody@gmail.com",
       department: "Pediatrics",
       specialization: "Child Specialist",
-      sex: "Male"
+      sex: "Male",
     },
     {
       id: 5,
@@ -46,8 +45,8 @@ export default function DoctorsList() {
       email: "esther@gmail.com",
       department: "Dermatology",
       specialization: "Skin Specialist",
-      sex: "Female"
-    }
+      sex: "Female",
+    },
   ];
 
   return (
@@ -92,7 +91,9 @@ export default function DoctorsList() {
             {doctors.map((doctor) => (
               <tr key={doctor.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{doctor.name}</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {doctor.name}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{doctor.phone}</div>
@@ -101,10 +102,14 @@ export default function DoctorsList() {
                   <div className="text-sm text-gray-900">{doctor.email}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{doctor.department}</div>
+                  <div className="text-sm text-gray-900">
+                    {doctor.department}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{doctor.specialization}</div>
+                  <div className="text-sm text-gray-900">
+                    {doctor.specialization}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{doctor.sex}</div>
