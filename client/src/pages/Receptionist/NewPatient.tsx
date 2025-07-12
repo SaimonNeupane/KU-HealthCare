@@ -1,14 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaSearch, FaExternalLinkAlt, FaCalendarAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import {PateintDetials} from '../../utils/api'
+// import PatientsList from "../Admin/PatientList";
 
 const Header: React.FC = () => {
+  const [response,setResponse]=useState(null)
+  
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [isActive, setIsActive] = useState("2");
   const navigate = useNavigate();
   const handleChange = (a: string) => {
     setIsActive(a);
   };
+  useEffect(()=>{
+    PateintDetials().then((res:any)=>{
+    setResponse(res.data)
+  })
+  
+  },[])
+  
+  useEffect(()=>{
+    console.log(response)
+  },[response])
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">

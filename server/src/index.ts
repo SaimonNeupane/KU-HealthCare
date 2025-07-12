@@ -8,6 +8,8 @@ import doctorRoutes from "./routes/doctorRoute";
 
 import bodyParser, { json } from "body-parser";
 import morgan from "morgan";
+import cors from "cors";
+
 import http from "http";
 import initializeSocket from "./services/socketServer";
 
@@ -19,6 +21,8 @@ const httpServer = http.createServer(app);
 initializeSocket(httpServer);
 
 app.use(bodyParser.json());
+app.use(morgan("dev"));
+app.use(cors());
 app.use(morgan("dev"));
 
 app.get("/", (req: Request, res: Response) => {
