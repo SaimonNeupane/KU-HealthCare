@@ -79,3 +79,7 @@ export const PatientDetials=AsyncError(async(req:Request,res:Response,next:NextF
         patients
     })
 })
+
+export const RegisterPatient=AsyncError((req:Request,res:Response,next:NextFunction)=>{
+    const body = req.body
+})

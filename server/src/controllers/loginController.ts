@@ -9,24 +9,30 @@ configDotenv()
 
 const prisma = new PrismaClient();
 
-export const login: any = AsyncError(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+interface customRequest extends Request{
+    user?:any
+}
 
-    const { username, password, role } = req.body
-    const found = await prisma.user.findFirst({ where: { username } })
+export const login: any = AsyncError(async (req: customRequest, res: Response, next: NextFunction): Promise<any> => {
+
+    const { email, password, role } = req.body
+    const found = await prisma.user.findFirst({ where: { email } })
     if (found?.password === password) {
-        if (found?.role === role) {
+      
             
-            
-              const  token = jwt.sign({ username, role }, process.env.JWT_SECRET_KEY!, { expiresIn: '1h' })
+              const  token = jwt.sign({ email, role }, process.env.JWT_SECRET_KEY!, { expiresIn: '1h' })
+              req.user=found
             
             return res.status(200).json({
                 status: "Success",
                 statusCode: 200,
-                token
+                token,
+                user:req.user
+                
 
             })
 
-        }
+        
 
     }
     next (new HttpError(402,'unauthorized'))

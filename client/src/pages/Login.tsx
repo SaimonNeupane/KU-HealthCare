@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, Hospital } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import {LoginAPI} from '../utils/api'
 
 function Login() {
 
@@ -12,6 +13,7 @@ function Login() {
     email: false,
     password: false
   });
+
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -34,8 +36,10 @@ function Login() {
 
   const handleLogin = () => {
     if (validateForm()) {
-      // Handle login logic here
-      console.log("Login attempt with:", { email, password, rememberMe });
+      LoginAPI({email,password}).then((res)=>{
+        console.log(res)
+      })
+      console.log("Login attempt with:", { email, password });
     }
   };
   const handleSubmit = (e: React.FormEvent) => {
