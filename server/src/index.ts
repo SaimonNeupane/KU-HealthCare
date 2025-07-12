@@ -9,10 +9,13 @@ import doctorRoutes from "./routes/doctorRoute";
 
 import bodyParser, { json } from "body-parser";
 import morgan from "morgan";
+import cors from 'cors'
+
 const app: Express = express();
 const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(morgan('dev'))
+app.use(cors())
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server is running");
