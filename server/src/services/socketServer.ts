@@ -16,8 +16,13 @@ const initializeSocket = (httpServer: HttpServer) => {
     socket.on("message", ({ message }) => {
       console.log(message);
     });
-    socket.on("labreportarrived", ({ patientName }) => {
-      socket.emit("doctornotif", patientName);
+    socket.on("send-lab-report", ({ patientName }) => {
+      console.log(patientName);
+      io.emit("lab-report-arrived", { patientName });
+    });
+    socket.on("new-patient-registered", ({ patientName }) => {
+      console.log(patientName);
+      io.emit("patient-registered", { patientName });
     });
   });
 

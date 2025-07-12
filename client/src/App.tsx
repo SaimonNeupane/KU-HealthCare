@@ -25,7 +25,7 @@ function App() {
       <Route path="/receptionist/dashboard" element={<Dashboard />} />
       <Route path="/doctorNotification" element={<Notification />} />
       <Route path="/doctorMyPatients" element={<MyPatients />} />
-      <Route path="/doctorLabreports" element={<LabReports />} />
+      <Route path="/labassistant/reportstatus" element={<LabReports />} />
 
       <Route path="/admin" element={<AdminPage />} />
       <Route path="/admin/*" element={<AdminPage />} />
