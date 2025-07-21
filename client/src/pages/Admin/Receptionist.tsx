@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { useState } from "react";
+import { Edit, Trash2 } from "lucide-react";
 
 const ReceptionistsList = () => {
   const [receptionists, setReceptionists] = useState([
@@ -9,7 +9,7 @@ const ReceptionistsList = () => {
       phone: "(217) 555-0113",
       email: "brooklyn@gmail.com",
       department: "Cardiology",
-      sex: "Female"
+      sex: "Female",
     },
     {
       id: 2,
@@ -17,7 +17,7 @@ const ReceptionistsList = () => {
       phone: "(308) 555-0121",
       email: "kristin@gmail.com",
       department: "Neurology",
-      sex: "Female"
+      sex: "Female",
     },
     {
       id: 3,
@@ -25,8 +25,8 @@ const ReceptionistsList = () => {
       phone: "(219) 555-0114",
       email: "jacob@gmail.com",
       department: "Orthopedics",
-      sex: "Male"
-    }
+      sex: "Male",
+    },
   ]);
 
   interface HandleEdit {
@@ -34,7 +34,7 @@ const ReceptionistsList = () => {
   }
 
   const handleEdit: HandleEdit = (id) => {
-    console.log('Edit receptionist with id:', id);
+    console.log("Edit receptionist with id:", id);
     // Add edit functionality here
   };
 
@@ -48,13 +48,17 @@ const ReceptionistsList = () => {
   }
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this receptionist?')) {
-      setReceptionists(receptionists.filter((receptionist: Receptionist) => receptionist.id !== id));
+    if (window.confirm("Are you sure you want to delete this receptionist?")) {
+      setReceptionists(
+        receptionists.filter(
+          (receptionist: Receptionist) => receptionist.id !== id
+        )
+      );
     }
   };
 
   const handleAddReceptionist = () => {
-    console.log('Add new receptionist');
+    console.log("Add new receptionist");
     // Add new receptionist functionality here
   };
 
@@ -62,7 +66,9 @@ const ReceptionistsList = () => {
     <div className="p-6">
       {/* Title and Add Button */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-4xl font-bold text-gray-900">List of Receptionists</h1>
+        <h1 className="text-4xl font-bold text-gray-900">
+          List of Receptionists
+        </h1>
         <button
           onClick={handleAddReceptionist}
           className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -99,12 +105,19 @@ const ReceptionistsList = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {receptionists.map((receptionist) => (
-                <tr key={receptionist.id} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={receptionist.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{receptionist.name}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {receptionist.name}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{receptionist.phone}</div>
+                    <div className="text-sm text-gray-900">
+                      {receptionist.phone}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
@@ -112,10 +125,14 @@ const ReceptionistsList = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{receptionist.department}</div>
+                    <div className="text-sm text-gray-900">
+                      {receptionist.department}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{receptionist.sex}</div>
+                    <div className="text-sm text-gray-900">
+                      {receptionist.sex}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">

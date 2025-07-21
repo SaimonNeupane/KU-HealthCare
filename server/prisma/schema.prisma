@@ -105,11 +105,11 @@ model Patient {
   gender         String        @db.VarChar(10)
   contact_number String        @db.VarChar(10)
   address        String
-  bedId          String
+  bedId          String?
   created_at     DateTime      @default(now())
   Appointment    Appointment[]
   LabTest        LabTest[]
-  bed            Bed           @relation(fields: [bedId], references: [bed_id])
+  bed            Bed?          @relation(fields: [bedId], references: [bed_id])
 }
 
 model Appointment {

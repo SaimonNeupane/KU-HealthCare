@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Eye, EyeOff, Hospital } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
-import {LoginAPI} from '../utils/api'
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 function Login() {
-
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [formErrors, setFormErrors] = useState({
     email: false,
-    password: false
+    password: false,
   });
 
   const navigate = useNavigate();
@@ -22,12 +22,12 @@ function Login() {
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-  }
+  };
 
   const validateForm = () => {
     const errors = {
       email: email.trim() !== "" && !isValidEmail(email),
-      password: password.trim() === ""
+      password: password.trim() === "",
     };
 
     setFormErrors(errors);
@@ -36,16 +36,16 @@ function Login() {
 
   const handleLogin = () => {
     if (validateForm()) {
-      LoginAPI({email,password}).then((res)=>{
-        console.log(res)
-      })
+      login({ email, password }).then((res) => {
+        console.log(res);
+      });
       console.log("Login attempt with:", { email, password });
     }
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // Prevents page refresh
     console.log("Submitted email:", email);
-    navigate("/receptionist/newpatient")
+    navigate("/receptionist/newpatient");
   };
 
   return (
@@ -56,7 +56,9 @@ function Login() {
           <div className="container mx-auto">
             <div className="flex items-center">
               <Hospital size={24} className="text-green-600 mr-2" />
-              <span className="font-bold text-xl text-green-600">KU HealthCare</span>
+              <span className="font-bold text-xl text-green-600">
+                KU HealthCare
+              </span>
             </div>
           </div>
         </header>
@@ -66,13 +68,19 @@ function Login() {
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
               <Hospital size={64} className="text-green-600 mx-auto mb-4" />
-              <h1 className="text-2xl font-semibold text-gray-800">Login to KU HealthCare</h1>
+              <h1 className="text-2xl font-semibold text-gray-800">
+                Login to KU HealthCare
+              </h1>
             </div>
 
             <div className="space-y-6">
               {/* Username/Email field */}
               <div className="space-y-2">
-                <label htmlFor="email" itemType="email" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="email"
+                  itemType="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Username or email <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -86,8 +94,9 @@ function Login() {
                     }
                   }}
                   placeholder="krskeshav01@gmail.com"
-                  className={`w-full px-3 py-2 rounded-md bg-green-50 border ${formErrors.email ? "border-red-500" : "border-green-100"
-                    } focus:outline-none focus:ring-2 focus:ring-green-500`}
+                  className={`w-full px-3 py-2 rounded-md bg-green-50 border ${
+                    formErrors.email ? "border-red-500" : "border-green-100"
+                  } focus:outline-none focus:ring-2 focus:ring-green-500`}
                   required
                 />
                 {formErrors.email && (
@@ -97,7 +106,10 @@ function Login() {
 
               {/* Password field */}
               <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -111,8 +123,11 @@ function Login() {
                         setFormErrors({ ...formErrors, password: false });
                       }
                     }}
-                    className={`w-full px-3 py-2 rounded-md bg-green-50 border ${formErrors.password ? "border-red-500" : "border-green-100"
-                      } focus:outline-none focus:ring-2 focus:ring-green-500`}
+                    className={`w-full px-3 py-2 rounded-md bg-green-50 border ${
+                      formErrors.password
+                        ? "border-red-500"
+                        : "border-green-100"
+                    } focus:outline-none focus:ring-2 focus:ring-green-500`}
                     required
                   />
                   <button
@@ -124,7 +139,9 @@ function Login() {
                   </button>
                 </div>
                 {formErrors.password && (
-                  <p className="text-red-500 text-xs mt-1">Password is required</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    Password is required
+                  </p>
                 )}
               </div>
 
@@ -138,7 +155,10 @@ function Login() {
                   onChange={() => setRememberMe(!rememberMe)}
                   className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-gray-700"
+                >
                   Remember me
                 </label>
               </div>
@@ -167,7 +187,10 @@ function Login() {
               <div className="text-center">
                 <p className="text-sm text-gray-600">
                   New user?{" "}
-                  <a href="/Signup" className="text-green-600 hover:text-green-500">
+                  <a
+                    href="/Signup"
+                    className="text-green-600 hover:text-green-500"
+                  >
                     Sign up
                   </a>
                 </p>
