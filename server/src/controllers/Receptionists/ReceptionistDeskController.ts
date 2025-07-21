@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import AsyncError from "../../Errors/asyncError";
 import HttpError from "../../Errors/httpError";
+import { CLIENT_RENEG_LIMIT } from "tls";
+import { stat } from "fs";
 
 const client = new PrismaClient();
 
@@ -80,6 +82,19 @@ export const PatientDetials=AsyncError(async(req:Request,res:Response,next:NextF
     })
 })
 
-export const RegisterPatient=AsyncError((req:Request,res:Response,next:NextFunction)=>{
-    const body = req.body
+export const RegisterPatient=AsyncError(async (req:Request,res:Response,next:NextFunction)=>{
+    const data = req.body
+    console.log(data)
+    const createPatient = await client.patient.create({data})
+    if(!createPatient){
+        next (new HttpError(400,'couldnot create patient'))
+    }
+    console.log(data)
+    return res.status(200).json({
+        status:'success',
+        statusCode:200,
+        createPatient
+        
+    })
+    
 })
