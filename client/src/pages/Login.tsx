@@ -22,16 +22,16 @@ function Login() {
       // Route based on role
       switch (role) {
         case "doctor":
-          navigate("/doctormypatients");
+          navigate("/doctor");
           break;
         case "receptionist":
-          navigate("/receptionist/newpatient");
+          navigate("/receptionist");
           break;
         case "admin":
           navigate("/admin");
           break;
         case "lab_assistant":
-          navigate("/labassistant/reportstatus");
+          navigate("/labassistant");
           break;
         default:
           break;
