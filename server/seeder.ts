@@ -209,6 +209,24 @@ const bed2 = await prisma.bed.create({
     status: "occupied",
   },
 })
+ const existingBeds = await prisma
+.bed.count();
+  if (existingBeds >= 50) {
+    console.log("Beds already seeded.");
+    return;
+  }
+
+  const bedData = Array.from({ length: 50 }, (_, i) => ({
+    bed_number: i + 1,
+    status: 'available',
+  }));
+
+  await prisma.bed.createMany({
+    data: bedData,
+    skipDuplicates: true,
+  });
+
+  console.log('✅ 50 beds created.');
 
 const patient2 = await prisma.patient.create({
   data: {
