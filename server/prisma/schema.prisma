@@ -22,12 +22,13 @@ model User {
 }
 
 model Department {
-  department_id String   @id @default(uuid())
-  name          String   @db.VarChar(20)
+  department_id String        @id @default(uuid())
+  name          String        @db.VarChar(20)
   description   String
-  created_at    DateTime @default(now())
+  created_at    DateTime      @default(now())
   doctor        Doctor[]
   Room          Room[]
+  Appointment   Appointment[]
 }
 
 model Room {
@@ -113,17 +114,19 @@ model Patient {
 }
 
 model Appointment {
-  appointment_id   String    @id @default(uuid())
+  appointment_id   String      @id @default(uuid())
   patientId        String
   doctorId         String
   roomId           String
-  appointment_time DateTime
-  status           String    @db.VarChar
+  appointment_time DateTime    @default(now())
+  status           String      @db.VarChar
   is_emergency     Boolean
-  created_at       DateTime  @default(now())
-  patient          Patient   @relation(fields: [patientId], references: [patient_id])
-  room             Room      @relation(fields: [roomId], references: [room_id])
+  created_at       DateTime    @default(now())
+  patient          Patient     @relation(fields: [patientId], references: [patient_id])
+  room             Room        @relation(fields: [roomId], references: [room_id])
   LabTest          LabTest[]
+  departmentId     String?
+  department       Department? @relation(fields: [departmentId], references: [department_id])
 }
 
 model LabTest {
