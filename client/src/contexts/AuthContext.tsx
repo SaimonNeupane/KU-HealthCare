@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     queryKey: ["validate"],
     queryFn: validateToken,
     enabled: !!token,
-    refetchInterval: 4 * 1000,
+    refetchInterval: 40 * 1000,
     retry: false,
     refetchOnWindowFocus: true,
     staleTime: 0,
