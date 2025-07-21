@@ -2,10 +2,20 @@ import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import AsyncError from "../../Errors/asyncError";
 import HttpError from "../../Errors/httpError";
-import { CLIENT_RENEG_LIMIT } from "tls";
-import { stat } from "fs";
+import {z} from 'zod'
+
 
 const client = new PrismaClient();
+
+const patientSchema=  z.object({
+    first_name :z.string(),
+    last_name:z.string(),
+    age:z.int(),
+    gender:z.string(),
+    contact_number:z.string(),
+    adress:z.string()
+    
+})
 
 export const DoctorDetails = AsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -83,17 +93,21 @@ export const PatientDetials=AsyncError(async(req:Request,res:Response,next:NextF
 })
 
 export const RegisterPatient=AsyncError(async (req:Request,res:Response,next:NextFunction)=>{
+    const parseError=patientSchema.safeParse(req.body)
+    if(!parseError.success){
+        return next(new HttpError(400,JSON.stringify(z.prettifyError(parseError.error))))
+    }
     const data = req.body
     console.log(data)
-    const createPatient = await client.patient.create({data})
-    if(!createPatient){
+    const createdPatient = await client.patient.create({data:data})
+    if(!createdPatient){
         next (new HttpError(400,'couldnot create patient'))
     }
     console.log(data)
     return res.status(200).json({
         status:'success',
         statusCode:200,
-        createPatient
+        createdPatient
         
     })
     
