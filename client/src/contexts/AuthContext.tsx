@@ -6,8 +6,7 @@ import {
   useEffect,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { LoginAPI } from "../utils/api";
+import { GetUserInfo, LoginAPI } from "../utils/api";
 
 interface User {
   username: string;
@@ -78,12 +77,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw new Error("No token available");
     }
 
-    const response = await axios.get("http://localhost:3000/user/getinfo", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
+    const response = await GetUserInfo();
     if (response.status === 200) {
       setIsAuthenticated(true);
     }
