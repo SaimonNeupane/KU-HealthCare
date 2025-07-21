@@ -8,6 +8,7 @@ import Notification from "./pages/Doctor/Notification.tsx";
 import AdminPage from "./pages/Admin/AdminPage.tsx";
 import MyPatients from "./pages/Doctor/MyPatients.tsx";
 import LabReports from "./pages/Lab_Assistant/LabReports.tsx";
+import ProtectedRoute from "./utils/ProtectedRoute.tsx";
 
 function App() {
   return (
@@ -17,18 +18,67 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      <Route path="/receptionist/newpatient" element={<NewPatient />} />
+      <Route
+        path="/receptionist/newpatient"
+        element={
+          <ProtectedRoute>
+            <NewPatient />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/receptionist"
         element={<Navigate to="/receptionist/dashboard" />}
       />
-      <Route path="/receptionist/dashboard" element={<Dashboard />} />
-      <Route path="/doctorNotification" element={<Notification />} />
-      <Route path="/doctorMyPatients" element={<MyPatients />} />
-      <Route path="/labassistant/reportstatus" element={<LabReports />} />
+      <Route
+        path="/receptionist/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctorNotification"
+        element={
+          <ProtectedRoute>
+            <Notification />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctorMyPatients"
+        element={
+          <ProtectedRoute>
+            <MyPatients />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/labassistant/reportstatus"
+        element={
+          <ProtectedRoute>
+            <LabReports />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path="/admin" element={<AdminPage />} />
-      <Route path="/admin/*" element={<AdminPage />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute>
+            <AdminPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

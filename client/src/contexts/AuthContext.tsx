@@ -12,7 +12,7 @@ import { LoginAPI } from "../utils/api";
 interface User {
   username: string;
   email: string;
-  profilePic: string;
+  role: string;
 }
 
 interface LoginData {
@@ -26,7 +26,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   username?: string;
   email?: string;
-  profilePic?: string;
+  role?: string;
 }
 
 interface AuthProviderProps {
@@ -39,7 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   username: undefined,
   email: undefined,
-  profilePic: undefined,
+  role: undefined,
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -103,6 +103,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const username = userData?.username;
   const email = userData?.email;
+  const role = userData?.role;
 
   useEffect(() => {
     if (autherr) {
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return (
     <AuthContext.Provider
-      value={{ login, logout, isAuthenticated, username, email }}
+      value={{ login, logout, isAuthenticated, username, email, role }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, Hospital } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 function Login() {
-  const { login } = useAuth();
+  const { login, isAuthenticated, role } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState("");
@@ -15,6 +15,29 @@ function Login() {
   });
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("Auth state changed:", { isAuthenticated, role });
+    if (isAuthenticated && role) {
+      // Route based on role
+      switch (role) {
+        case "doctor":
+          navigate("/doctormypatients");
+          break;
+        case "receptionist":
+          navigate("/receptionist/newpatient");
+          break;
+        case "admin":
+          navigate("/admin");
+          break;
+        case "lab_assistant":
+          navigate("/labassistant/reportstatus");
+          break;
+        default:
+          break;
+      }
+    }
+  }, [isAuthenticated, role, navigate]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -45,7 +68,6 @@ function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // Prevents page refresh
     console.log("Submitted email:", email);
-    navigate("/receptionist/newpatient");
   };
 
   return (
@@ -93,7 +115,6 @@ function Login() {
                       setFormErrors({ ...formErrors, email: false });
                     }
                   }}
-                  placeholder="krskeshav01@gmail.com"
                   className={`w-full px-3 py-2 rounded-md bg-green-50 border ${
                     formErrors.email ? "border-red-500" : "border-green-100"
                   } focus:outline-none focus:ring-2 focus:ring-green-500`}

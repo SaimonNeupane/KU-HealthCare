@@ -21,10 +21,15 @@ export const login: any = AsyncError(
   ): Promise<any> => {
     const { email, password, role } = req.body;
     const found = await prisma.user.findFirst({ where: { email } });
+    const userId = found?.user_id;
     if (found?.password === password) {
-      const token = jwt.sign({ email, role }, process.env.JWT_SECRET_KEY!, {
-        expiresIn: "1h",
-      });
+      const token = jwt.sign(
+        { email, role, userId },
+        process.env.JWT_SECRET_KEY!,
+        {
+          expiresIn: "1h",
+        }
+      );
       req.user = found;
 
       return res.status(200).json({
