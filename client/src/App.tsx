@@ -15,6 +15,7 @@ function App() {
     <Routes>
       <Route element={<MainLayout />}></Route>
       <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/*" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
@@ -65,14 +66,6 @@ function App() {
 
       <Route
         path="/admin"
-        element={
-          <ProtectedRoute>
-            <AdminPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/*"
         element={
           <ProtectedRoute>
             <AdminPage />
