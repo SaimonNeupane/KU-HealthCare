@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaSearch, FaCheck, FaClock } from "react-icons/fa";
+import { useSocket } from "../../contexts/socketContext";
 
 interface LabReportProps {
   patient: string;
@@ -8,6 +9,12 @@ interface LabReportProps {
 }
 
 const LabReportRow: React.FC<LabReportProps> = ({ patient, id, status }) => {
+  const socket = useSocket();
+  function changeStatus() {
+    status = "completed";
+    socket?.emit("send-lab-report", { patientName: patient });
+  }
+
   return (
     <div className="grid grid-cols-3 gap-8 items-center py-4 border-b border-gray-100">
       <div className="text-gray-900 font-medium">{patient}</div>
@@ -22,6 +29,12 @@ const LabReportRow: React.FC<LabReportProps> = ({ patient, id, status }) => {
             Processing
           </span>
         )}
+        <button
+          className=" border-amber-700 text-black border-4 rounded-lg px-1 ml-3 cursor-pointer"
+          onClick={changeStatus}
+        >
+          change status
+        </button>
       </div>
     </div>
   );

@@ -1,29 +1,28 @@
 import { useEffect, useState } from "react";
 import { FaSearch, FaExternalLinkAlt, FaCalendarAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import {PateintDetials} from '../../utils/api'
+import { PateintDetials } from "../../utils/api";
+import { useSocket } from "../../contexts/socketContext";
 // import PatientsList from "../Admin/PatientList";
 
 const Header: React.FC = () => {
-  const [response,setResponse]=useState(null)
-  
-  
+  const [response, setResponse] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isActive, setIsActive] = useState("2");
   const navigate = useNavigate();
   const handleChange = (a: string) => {
     setIsActive(a);
   };
-  useEffect(()=>{
-    PateintDetials().then((res:any)=>{
-    setResponse(res.data)
-  })
-  
-  },[])
-  
-  useEffect(()=>{
-    console.log(response)
-  },[response])
+  useEffect(() => {
+    PateintDetials().then((res: any) => {
+      setResponse(res.data);
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log(response);
+  }, [response]);
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
@@ -124,6 +123,12 @@ function NewPatient() {
     age: "",
     emergency: false,
   });
+  const socket = useSocket();
+
+  function handleSubmit() {
+    if (!socket) return;
+    socket.emit("new-patient-registered", { patientName: patientData.name });
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -341,6 +346,7 @@ function NewPatient() {
               <button
                 type="button"
                 className="w-[50%] bg-[#009963] hover:bg-green-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                onClick={handleSubmit}
               >
                 Submit
               </button>
