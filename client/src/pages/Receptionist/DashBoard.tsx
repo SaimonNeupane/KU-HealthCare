@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FaSearch, FaExternalLinkAlt, FaCalendarAlt } from "react-icons/fa";
+import { FaSearch, FaCalendarAlt } from "react-icons/fa";
+import { LuLogOut } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import {
   User,
@@ -13,10 +14,12 @@ import {
   Users,
   Stethoscope,
 } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Header: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isActive, setIsActive] = useState("1");
+  const { logout } = useAuth();
 
   const navigate = useNavigate();
   const handleRegisterPatient = (a: string) => {
@@ -78,7 +81,7 @@ const Header: React.FC = () => {
           </div>
 
           <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
-            <FaExternalLinkAlt className="w-5 h-5" />
+            <LuLogOut className="w-5 h-5" onClick={logout} />
           </button>
         </div>
       </div>
