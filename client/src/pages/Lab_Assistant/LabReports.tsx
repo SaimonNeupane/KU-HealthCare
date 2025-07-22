@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaSearch, FaCheck, FaClock } from "react-icons/fa";
 import { useSocket } from "../../contexts/socketContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface LabReportProps {
   patient: string;
@@ -45,6 +46,8 @@ const LabReports: React.FC = () => {
     "all" | "completed" | "processing"
   >("all");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { username, role } = useAuth();
 
   const labReports = [
     { patient: "Grace H", id: "ID: 1234", status: "processing" as const },
@@ -91,21 +94,25 @@ const LabReports: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <span className="text-gray-600 font-medium cursor-pointer hover:text-gray-900">
+            <div className=" font-medium flex flex-col items-end mr-10">
+              <span className=" font-medium">{username}</span>
+              <span className="text-neutral-500">{role}</span>
+            </div>
+            {/* <span className="text-gray-600 font-medium cursor-pointer hover:text-gray-900">
               <button className="flex items-center space-x-2 px-4 py-2 bg-green-900 text-white rounded-full font-medium hover:bg-green-700 transition-colors cursor-pointer">
                 Dashboard
               </button>
-            </span>
+            </span> */}
 
-            <span className="text-gray-600 font-medium cursor-pointer hover:text-gray-900">
+            {/* <span className="text-gray-600 font-medium cursor-pointer hover:text-gray-900">
               <button className="flex items-center space-x-2 px-7 py-2 bg-green-900 text-white rounded-full font-medium hover:bg-green-700 transition-colors cursor-pointer">
                 Patients
               </button>
-            </span>
+            </span> */}
 
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-5 ">
               <img
-                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face"
+                src="vite.svg"
                 alt="Profile"
                 className="w-8 h-8 rounded-full object-cover"
               />
