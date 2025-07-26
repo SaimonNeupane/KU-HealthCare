@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { FaSearch, FaExternalLinkAlt, FaCalendarAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { PateintDetials } from "../../utils/api";
+import {
+  PateintDetials,
+  RegisterPatientAPI,
+  ShowDoctorsAPI,
+} from "../../utils/api";
 import { useSocket } from "../../contexts/socketContext";
 // import PatientsList from "../Admin/PatientList";
 
@@ -99,17 +103,31 @@ type DepartmentName =
   | "neurology"
   | "orthopedics"
   | "pediatrics"
-  | "general"
-  | "emergency";
+  | "general";
 
-const departments: Record<DepartmentName, string[]> = {
-  cardiology: ["Dr. Parikchit Sen", "Dr. Keshav Raj Sharma"],
-  neurology: ["Dr. Saimon Neupane", "Dr. Risham Raj Byahut"],
-  orthopedics: ["Dr. Prabesh Sharma", "Dr. Pitambar Chaudhary"],
-  pediatrics: ["Dr. Salon Timilsina", "Dr. Udaya Ojha"],
-  general: ["Dr. Gaurav Bista", "Dr. Shriharsha Acharya"],
-  emergency: ["Dr. Prabesh Ojha", "Dr. Piyush Bhat"],
+const departments: DepartmentName[] = [
+  "cardiology",
+  "neurology",
+  "orthopedics",
+  "pediatrics",
+  "general",
+];
+
+const deptId: Record<DepartmentName, string> = {
+  cardiology: "4eaf8cc0-07ca-4f5d-9997-2b3037877539",
+  neurology: "6d120962-c5eb-4526-b2cb-b3d14e7b8aac",
+  orthopedics: "764b1ef6-e4d7-4a67-a9a3-ad125141cd7b",
+  pediatrics: "fd3814bd-ffda-43cb-acd2-df7dc98b9810",
+  general: "f677a4a3-03f9-4a11-8e1a-4ac8acbb4548",
 };
+
+interface Doctor {
+  doctor_id: string;
+  first_name: string;
+  last_name: string;
+  departmentId: string;
+  department: any;
+}
 
 function NewPatient() {
   const [patientData, setPatientData] = useState({
@@ -123,11 +141,63 @@ function NewPatient() {
     age: "",
     emergency: false,
   });
-  const socket = useSocket();
 
-  function handleSubmit() {
+  const socket = useSocket();
+  const [availableDocs, setAvailableDocs] = useState<Doctor[]>([]);
+
+  // Create finalData dynamically when needed
+  const getFinalData = () => {
+    const nameParts = patientData.name.split(" ");
+    return {
+      is_emergency: patientData.emergency,
+      doctorId: patientData.doctor,
+      departmentId: deptId[patientData.department as DepartmentName],
+      patientDetails: {
+        first_name: nameParts[0] || "",
+        last_name: nameParts.slice(1).join(" ") || "",
+        age: parseInt(patientData.age),
+        gender: patientData.gender,
+        contact_number: patientData.phone,
+        address: patientData.address,
+      },
+    };
+  };
+
+  useEffect(() => {
+    async function fetchDocs() {
+      if (patientData.department) {
+        try {
+          const res = await ShowDoctorsAPI(
+            deptId[patientData.department as DepartmentName]
+          );
+          if (res.data.status === "success") {
+            setAvailableDocs(res.data.AvailableDoctor);
+          }
+        } catch (error) {
+          console.error("Error fetching doctors:", error);
+          setAvailableDocs([]);
+        }
+      } else {
+        setAvailableDocs([]);
+      }
+    }
+    fetchDocs();
+  }, [patientData.department]);
+
+  async function handleSubmit() {
     if (!socket) return;
-    socket.emit("new-patient-registered", { patientName: patientData.name });
+
+    try {
+      socket.emit("new-patient-registered", { patientName: patientData.name });
+      const finalData = getFinalData();
+      console.log(finalData);
+      const response = await RegisterPatientAPI(finalData);
+      console.log("Patient registered successfully:", response.data);
+      // Maybe reset form or show success message here
+    } catch (error) {
+      console.error("Error registering patient:", error);
+      // Handle error (show error message to user)
+    }
   }
 
   return (
@@ -285,7 +355,7 @@ function NewPatient() {
                 onChange={(e) =>
                   setPatientData({ ...patientData, address: e.target.value })
                 }
-                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-colors text-sm"
               />
             </div>
 
@@ -307,7 +377,7 @@ function NewPatient() {
                 className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white text-sm"
               >
                 <option value="">Select Department</option>
-                {Object.keys(departments).map((dept) => (
+                {departments.map((dept) => (
                   <option key={dept} value={dept}>
                     {dept.charAt(0).toUpperCase() + dept.slice(1)}
                   </option>
@@ -326,18 +396,20 @@ function NewPatient() {
                 onChange={(e) =>
                   setPatientData({ ...patientData, doctor: e.target.value })
                 }
-                disabled={!patientData.department}
+                disabled={
+                  !patientData.department ||
+                  !availableDocs ||
+                  availableDocs.length === 0
+                }
                 className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white disabled:bg-gray-50 disabled:text-gray-500 text-sm"
               >
                 <option value="">Select available Doctor</option>
-                {patientData.department &&
-                  departments[patientData.department as DepartmentName].map(
-                    (doctor) => (
-                      <option key={doctor} value={doctor}>
-                        {doctor}
-                      </option>
-                    )
-                  )}
+                {availableDocs.length > 0 &&
+                  availableDocs.map((doctor) => (
+                    <option key={doctor.doctor_id} value={doctor.doctor_id}>
+                      Dr.{doctor.first_name} {doctor.last_name}
+                    </option>
+                  ))}
               </select>
             </div>
 
