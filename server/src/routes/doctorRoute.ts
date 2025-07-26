@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { PatientDetails,bedQuery,labRequest } from "../controllers/Doctor/doctorController";
+import { PatientDetails,bedQuery,changeOnlineStatus,completeDiagnosis,labRequest } from "../controllers/Doctor/doctorController";
 
 const router: Router = Router();
 router.get("/patientdetails", PatientDetails);
 router.post('/requestlab',labRequest)
 router.post('/querybed/:id',bedQuery)
+router.post('/completeDiagnosis/:id',completeDiagnosis)
+router.post('/changeOnlineStatus/:id',changeOnlineStatus)
 
 export default router;
