@@ -8,6 +8,7 @@ import {
 } from "../../utils/api";
 import { useSocket } from "../../contexts/socketContext";
 import DoctorsList from "../Admin/DoctorsList";
+import { toast } from "sonner";
 // import PatientsList from "../Admin/PatientList";
 
 const Header: React.FC = () => {
@@ -268,12 +269,16 @@ function NewPatient() {
     }
 
     if (!socket) return;
+    const toastId=toast.loading('Registraion in progress')
 
     try {
       socket.emit("new-patient-registered", { patientName: `${patientData.firstName} ${patientData.lastName}` });
       const finalData = getFinalData();
       console.log(finalData);
       const response = await RegisterPatientAPI(finalData);
+      toast.success('Registration successful',{
+        id:toastId
+      })
       console.log("Patient registered successfully:", response.data);
       // Reset form on success
       setPatientData({
@@ -289,7 +294,10 @@ function NewPatient() {
         emergency: false,
       });
       setValidationErrors({});
-    } catch (error) {
+    } catch (err:any) {
+        toast.error(`Registration failed: ${err.response.data.message}`, {
+          id: toastId,
+        });
       console.error("Error registering patient:", error);
       // Handle error (show error message to user)
     }
