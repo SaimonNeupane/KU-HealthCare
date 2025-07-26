@@ -7,6 +7,7 @@ import {
   ShowDoctorsAPI,
 } from "../../utils/api";
 import { useSocket } from "../../contexts/socketContext";
+import DoctorsList from "../Admin/DoctorsList";
 // import PatientsList from "../Admin/PatientList";
 
 const Header: React.FC = () => {
@@ -127,11 +128,17 @@ interface Doctor {
   last_name: string;
   departmentId: string;
   department: any;
+  roomId:any,
+  room:{
+    room_number:any
+  }
+
 }
 
 function NewPatient() {
   const [patientData, setPatientData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     gender: "",
@@ -146,6 +153,7 @@ function NewPatient() {
   const [availableDocs, setAvailableDocs] = useState<Doctor[]>([]);
   const [showError, setShowError] = useState(false);
   const [error, setErr] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (error) {
@@ -156,17 +164,71 @@ function NewPatient() {
       return () => clearTimeout(timer); // Cleanup
     }
   }, [error]);
+  useEffect(()=>{
+    console.log(availableDocs)
+  },[availableDocs])
+
+  // Validation function
+  const validateFields = () => {
+    const errors: Record<string, string> = {};
+
+    if (!patientData.firstName.trim()) {
+      errors.firstName = "First name is required";
+    }
+
+    if (!patientData.lastName.trim()) {
+      errors.lastName = "Last name is required";
+    }
+
+    if (!patientData.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(patientData.email)) {
+      errors.email = "Email format is invalid";
+    }
+
+    if (!patientData.phone.trim()) {
+      errors.phone = "Phone number is required";
+    } else if (!/^\d{10}$/.test(patientData.phone.replace(/\D/g, ''))) {
+      errors.phone = "Phone number must be 10 digits";
+    }
+
+    if (!patientData.gender) {
+      errors.gender = "Gender is required";
+    }
+
+    if (!patientData.age.trim()) {
+      errors.age = "Age is required";
+    } else if (parseInt(patientData.age) <= 0 || parseInt(patientData.age) > 150) {
+      errors.age = "Age must be between 1 and 150";
+    }
+
+    if (!patientData.address.trim()) {
+      errors.address = "Address is required";
+    }
+
+    if (!patientData.department) {
+      errors.department = "Department is required";
+    }
+
+    if (!patientData.doctor) {
+      errors.doctor = "Doctor is required";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  const selectedDoctor = availableDocs.find(doc => doc.doctor_id === patientData.doctor);
 
   // Create finalData dynamically when needed
   const getFinalData = () => {
-    const nameParts = patientData.name.split(" ");
     return {
       is_emergency: patientData.emergency,
       doctorId: patientData.doctor,
+      roomId:selectedDoctor?.roomId||null,
       departmentId: deptId[patientData.department as DepartmentName],
       patientDetails: {
-        first_name: nameParts[0] || "",
-        last_name: nameParts.slice(1).join(" ") || "",
+        first_name: patientData.firstName,
+        last_name: patientData.lastName,
         age: parseInt(patientData.age),
         gender: patientData.gender,
         contact_number: patientData.phone,
@@ -184,6 +246,7 @@ function NewPatient() {
           );
           if (res.data.status === "success") {
             setAvailableDocs(res.data.AvailableDoctor);
+            console.log(availableDocs)
           }
         } catch (error: any) {
           console.error("Error fetching doctors:", error);
@@ -200,15 +263,32 @@ function NewPatient() {
   }, [patientData.department]);
 
   async function handleSubmit() {
+    if (!validateFields()) {
+      return;
+    }
+
     if (!socket) return;
 
     try {
-      socket.emit("new-patient-registered", { patientName: patientData.name });
+      socket.emit("new-patient-registered", { patientName: `${patientData.firstName} ${patientData.lastName}` });
       const finalData = getFinalData();
       console.log(finalData);
       const response = await RegisterPatientAPI(finalData);
       console.log("Patient registered successfully:", response.data);
-      // Maybe reset form or show success message here
+      // Reset form on success
+      setPatientData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        gender: "",
+        address: "",
+        department: "",
+        doctor: "",
+        age: "",
+        emergency: false,
+      });
+      setValidationErrors({});
     } catch (error) {
       console.error("Error registering patient:", error);
       // Handle error (show error message to user)
@@ -256,42 +336,71 @@ function NewPatient() {
           <div className="max-w-2xl space-y-6">
             {/* Name and Email Row */}
             <div className="flex gap-4">
-              {/* Name - 25% */}
-              <div className="w-1/1">
+              {/* First Name */}
+              <div className="w-1/2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
+                  First Name
                 </label>
                 <input
                   type="text"
-                  name="name"
-                  value={patientData.name}
+                  name="firstName"
+                  value={patientData.firstName}
                   onChange={(e) =>
-                    setPatientData({ ...patientData, name: e.target.value })
+                    setPatientData({ ...patientData, firstName: e.target.value })
                   }
-                  placeholder="Enter name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+                  placeholder="Enter first name"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
+                    validationErrors.firstName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {validationErrors.firstName && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.firstName}</p>
+                )}
               </div>
 
-              {/* Email - 25% */}
-              <div className="w-1/1">
+              {/* Last Name */}
+              <div className="w-1/2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
+                  Last Name
                 </label>
                 <input
-                  type="email"
-                  name="email"
-                  value={patientData.email}
+                  type="text"
+                  name="lastName"
+                  value={patientData.lastName}
                   onChange={(e) =>
-                    setPatientData({ ...patientData, email: e.target.value })
+                    setPatientData({ ...patientData, lastName: e.target.value })
                   }
-                  placeholder="Enter email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+                  placeholder="Enter last name"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
+                    validationErrors.lastName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {validationErrors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.lastName}</p>
+                )}
               </div>
+            </div>
 
-              {/* Spacer - 50% blank */}
-              <div className="w-1/2" />
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={patientData.email}
+                onChange={(e) =>
+                  setPatientData({ ...patientData, email: e.target.value })
+                }
+                placeholder="Enter email"
+                className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
+                  validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              {validationErrors.email && (
+                <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>
+              )}
             </div>
 
             {/* Phone Number */}
@@ -306,8 +415,14 @@ function NewPatient() {
                 onChange={(e) =>
                   setPatientData({ ...patientData, phone: e.target.value })
                 }
-                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+                placeholder="Enter phone number"
+                className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
+                  validationErrors.phone ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {validationErrors.phone && (
+                <p className="text-red-500 text-xs mt-1">{validationErrors.phone}</p>
+              )}
             </div>
 
             {/* Gender */}
@@ -319,7 +434,9 @@ function NewPatient() {
                 {["male", "female", "others"].map((gender) => (
                   <label
                     key={gender}
-                    className="flex items-center space-x-2 border border-gray-300 rounded-lg px-3 py-2 w-full max-w-[120px] cursor-pointer focus-within:ring-2 focus-within:ring-green-500"
+                    className={`flex items-center space-x-2 border rounded-lg px-3 py-2 w-full max-w-[120px] cursor-pointer focus-within:ring-2 focus-within:ring-green-500 ${
+                      validationErrors.gender ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   >
                     <input
                       type="radio"
@@ -341,6 +458,9 @@ function NewPatient() {
                 ))}
               </div>
             </div>
+            {validationErrors.gender && (
+              <p className="text-red-500 text-xs mt-1">{validationErrors.gender}</p>
+            )}
 
             {/* Age */}
             <div>
@@ -354,8 +474,14 @@ function NewPatient() {
                 onChange={(e) =>
                   setPatientData({ ...patientData, age: e.target.value })
                 }
-                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm"
+                placeholder="Enter age"
+                className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
+                  validationErrors.age ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {validationErrors.age && (
+                <p className="text-red-500 text-xs mt-1">{validationErrors.age}</p>
+              )}
             </div>
 
             {/* Address */}
@@ -370,8 +496,14 @@ function NewPatient() {
                 onChange={(e) =>
                   setPatientData({ ...patientData, address: e.target.value })
                 }
-                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-colors text-sm"
+                placeholder="Enter address"
+                className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
+                  validationErrors.address ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {validationErrors.address && (
+                <p className="text-red-500 text-xs mt-1">{validationErrors.address}</p>
+              )}
             </div>
 
             {/* Department */}
@@ -389,7 +521,9 @@ function NewPatient() {
                     doctor: "",
                   })
                 }
-                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white text-sm"
+                className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white text-sm ${
+                  validationErrors.department ? 'border-red-500' : 'border-gray-300'
+                }`}
               >
                 <option value="">Select Department</option>
                 {departments.map((dept) => (
@@ -398,6 +532,9 @@ function NewPatient() {
                   </option>
                 ))}
               </select>
+              {validationErrors.department && (
+                <p className="text-red-500 text-xs mt-1">{validationErrors.department}</p>
+              )}
             </div>
 
             {/* Doctor */}
@@ -409,24 +546,29 @@ function NewPatient() {
                 name="doctor"
                 value={patientData.doctor}
                 onChange={(e) =>
-                  setPatientData({ ...patientData, doctor: e.target.value })
+                  setPatientData({ ...patientData, doctor: e.target.value, })
                 }
                 disabled={
                   !patientData.department ||
                   !availableDocs ||
                   availableDocs.length === 0
                 }
-                className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white disabled:bg-gray-50 disabled:text-gray-500 text-sm"
+                className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white disabled:bg-gray-50 disabled:text-gray-500 text-sm ${
+                  validationErrors.doctor ? 'border-red-500' : 'border-gray-300'
+                }`}
               >
                 <option value="">Select available Doctor</option>
                 {availableDocs.length > 0 &&
                   availableDocs.map((doctor) => (
                     <option key={doctor.doctor_id} value={doctor.doctor_id}>
-                      Dr.{doctor.first_name} {doctor.last_name}
+                      Dr.{doctor.first_name} {doctor.last_name}__{doctor.room.room_number}
                     </option>
                   ))}
               </select>
-              {showError && <p className="text-red-500">No doctor online</p>}
+              {validationErrors.doctor && (
+                <p className="text-red-500 text-xs mt-1">{validationErrors.doctor}</p>
+              )}
+              {showError && <p className="text-red-500 text-xs mt-1">No doctor online</p>}
             </div>
 
             {/* Submit Button */}
