@@ -7,6 +7,7 @@ import {
 } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { GetUserInfo, LoginAPI } from "../utils/api";
+import { toast } from "sonner";
 
 interface User {
   username: string;
@@ -48,19 +49,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
 
   const login = async ({ email, password }: LoginData) => {
+    const toastId = toast.loading("Logging in...");
     try {
       const response = await LoginAPI({ email, password });
+
       if (response.status === 200) {
         const newToken = response.data.token;
         localStorage.setItem("token", newToken);
         setToken(newToken);
         setIsAuthenticated(true);
+
+        toast.success("Login successful!", { id: toastId });
         return response;
       }
     } catch (err: any) {
-      if (err.response) {
+      if (err.response?.data?.message) {
+        toast.error(`Login failed: ${err.response.data.message}`, {
+          id: toastId,
+        });
         throw err.response;
       } else {
+        toast.error("An unexpected error occurred.", { id: toastId });
         throw new Error("An unexpected error occurred.");
       }
     }
