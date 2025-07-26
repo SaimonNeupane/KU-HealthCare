@@ -144,6 +144,18 @@ function NewPatient() {
 
   const socket = useSocket();
   const [availableDocs, setAvailableDocs] = useState<Doctor[]>([]);
+  const [showError, setShowError] = useState(false);
+  const [error, setErr] = useState(false);
+
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+      const timer = setTimeout(() => {
+        setShowError(false);
+      }, 5000);
+      return () => clearTimeout(timer); // Cleanup
+    }
+  }, [error]);
 
   // Create finalData dynamically when needed
   const getFinalData = () => {
@@ -173,8 +185,11 @@ function NewPatient() {
           if (res.data.status === "success") {
             setAvailableDocs(res.data.AvailableDoctor);
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error fetching doctors:", error);
+          setShowError(true);
+          setErr(true);
+
           setAvailableDocs([]);
         }
       } else {
@@ -411,6 +426,7 @@ function NewPatient() {
                     </option>
                   ))}
               </select>
+              {showError && <p className="text-red-500">No doctor online</p>}
             </div>
 
             {/* Submit Button */}
