@@ -11,8 +11,6 @@ interface LabRequestBody {
   doctorId: string;
 }
 
-
-
 export const PatientDetails: any = async (req: Request, res: Response) => {
   const details = await prisma.patient.findMany({
     select: {
@@ -46,27 +44,93 @@ export const PatientDetails: any = async (req: Request, res: Response) => {
   return res.status(200).json(details);
 };
 
-export const labRequest = AsyncError(async (req: Request, res: Response, next: NextFunction) => {
-  const Appointment: LabRequestBody = req.body;
-
-  const labReq = await prisma.labTest.create({
-    data: {
-      appointmentId: Appointment.appointment_id,
-      patientId: Appointment.patientId,
-      requesting_doctor_id: Appointment.doctorId,
-      status: 'Pending',
-      
+export const labRequest = AsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const Appointment: LabRequestBody = req.body;
+    if (
+      !Appointment.appointment_id ||
+      !Appointment.patientId ||
+      !Appointment.doctorId
+    ) {
+      return next(new HttpError(400, "Missing required fields"));
     }
-  });
-  
-  if (!labReq) {
-    return next(new HttpError(400, `Lab test creation Failed`));
-  }
-  
-  return res.status(200).json({
-    status: "success",
-    statusCode: 200,
-    labReq
-  });
-});
 
+    const labReq = await prisma.labTest.create({
+      data: {
+        appointmentId: Appointment.appointment_id,
+        patientId: Appointment.patientId,
+        requesting_doctor_id: Appointment.doctorId,
+        status: "Pending",
+      },
+    });
+
+    if (!labReq) {
+      return next(new HttpError(400, `Lab test creation Failed`));
+    }
+
+    return res.status(200).json({
+      status: "success",
+      statusCode: 200,
+      labReq,
+    });
+  }
+);
+export const bedQuery = AsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const patient = await prisma.patient.findFirst({
+      where: {
+        patient_id: req.params.id,
+      },
+    });
+    const isAvailable: any = patient?.bedId;
+    if (!!isAvailable) {
+      const updatedBed = await prisma.bed.update({
+        where: { bed_id: isAvailable },
+        data: {
+          status: "available",
+        },
+      });
+      const updatedPatient = await prisma.patient.update({
+        where: {
+          patient_id: req.params.id,
+        },
+        data: {
+          bedId: null,
+        },
+      });
+      return res.status(200).json({
+        status: "success",
+        updatedBed,
+      });
+    }
+    const availableBed = await prisma.bed.findFirst({
+      where: {
+        status: "available",
+      },
+    });
+    if (!availableBed) {
+      return res.status(404).json({
+        status: "Fail",
+        message: "All beds are reserved",
+      });
+    }
+    const data = await prisma.bed.update({
+      where: { bed_id: availableBed?.bed_id },
+      data: {
+        status: "reserved",
+      },
+    });
+    const refinedPatient = await prisma.patient.update({
+      where: {
+        patient_id: req.params.id,
+      },
+      data: {
+        bedId: availableBed?.bed_id,
+      },
+    });
+    return res.status(200).json({
+      status: "Success",
+      data,
+    });
+  }
+);
