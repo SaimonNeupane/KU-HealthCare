@@ -1,68 +1,87 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaSearch, FaCheck, FaClock } from "react-icons/fa";
 import { useSocket } from "../../contexts/socketContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { LabAssistantAPI } from "../../utils/api";
+import { LogOut } from "lucide-react";
 
-interface LabReportProps {
+interface LabReport {
   patient: string;
   id: string;
   status: "completed" | "processing";
 }
 
-const LabReportRow: React.FC<LabReportProps> = ({ patient, id, status }) => {
-  const socket = useSocket();
-  function changeStatus() {
-    status = "completed";
-    socket?.emit("send-lab-report", { patientName: patient });
-  }
+interface LabReportRowProps extends LabReport {
+  onChangeStatus: () => void;
+}
 
-  return (
-    <div className="grid grid-cols-3 gap-8 items-center py-4 border-b border-gray-100">
-      <div className="text-gray-900 font-medium">{patient}</div>
-      <div className="text-gray-500">{id}</div>
-      <div>
-        {status === "completed" ? (
-          <span className="px-4 py-2 bg-green-200 text-green-800 rounded-full text-sm font-medium">
-            Completed
-          </span>
-        ) : (
-          <span className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium">
-            Processing
-          </span>
-        )}
+const LabReportRow: React.FC<LabReportRowProps> = ({
+  patient,
+  id,
+  status,
+  onChangeStatus,
+}) => (
+  <div className="grid grid-cols-3 gap-8 items-center py-4 border-b border-gray-100">
+    <div className="text-gray-900 font-medium">{patient}</div>
+    <div className="text-gray-500">{id}</div>
+    <div>
+      {status === "completed" ? (
+        <span className="px-4 py-2 bg-green-200 text-green-800 rounded-full text-sm font-medium">
+          Completed
+        </span>
+      ) : (
+        <span className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium">
+          Processing
+        </span>
+      )}
+      {status !== "completed" && (
         <button
-          className=" border-amber-700 text-black border-4 rounded-lg px-1 ml-3 cursor-pointer"
-          onClick={changeStatus}
+          className="border-amber-700 text-black border-4 rounded-lg px-1 ml-3 cursor-pointer"
+          onClick={onChangeStatus}
         >
           change status
         </button>
-      </div>
+      )}
     </div>
-  );
-};
+  </div>
+);
 
 const LabReports: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<
     "all" | "completed" | "processing"
   >("all");
   const [searchTerm, setSearchTerm] = useState("");
-
   const { username, role } = useAuth();
+  const socket = useSocket();
+  const [reports, setReports] = useState<LabReport[]>([]);
+  const { logout } = useAuth();
 
-  const labReports = [
-    { patient: "Grace H", id: "ID: 1234", status: "processing" as const },
-    { patient: "Michael J", id: "ID: 5678", status: "completed" as const },
-    { patient: "Elena S", id: "ID: 9101", status: "processing" as const },
-    { patient: "David W", id: "ID: 1121", status: "processing" as const },
-    { patient: "Maria M", id: "ID: 3141", status: "completed" as const },
-    { patient: "Juan L", id: "ID: 5161", status: "processing" as const },
-    { patient: "Sophia K", id: "ID: 7181", status: "completed" as const },
-    { patient: "Daniel P", id: "ID: 9202", status: "processing" as const },
-    { patient: "Emma R", id: "ID: 2232", status: "completed" as const },
-    { patient: "Lucas T", id: "ID: 4252", status: "processing" as const },
-  ];
+  useEffect(() => {
+    async function fetchReportStatus() {
+      try {
+        const res = await LabAssistantAPI();
+        const mapped: LabReport[] = res.data.map((item: any) => ({
+          patient: `${item.patient.first_name} ${item.patient.last_name}`,
+          id: item.patientId,
+          status: item.status === "pending" ? "processing" : item.status,
+        }));
+        setReports(mapped);
+      } catch (error) {
+        console.error("Error fetching reports:", error);
+      }
+    }
+    fetchReportStatus();
+  }, []);
 
-  const filteredReports = labReports.filter((report) => {
+  const handleChangeStatus = (id: string) => {
+    setReports((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, status: "completed" } : r))
+    );
+    const patientName = reports.find((r) => r.id === id)?.patient;
+    socket?.emit("send-lab-report", { patientName });
+  };
+
+  const filteredReports = reports.filter((report) => {
     const matchesSearch =
       report.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -71,11 +90,9 @@ const LabReports: React.FC = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const allCount = labReports.length;
-  const completedCount = labReports.filter(
-    (r) => r.status === "completed"
-  ).length;
-  const processingCount = labReports.filter(
+  const allCount = reports.length;
+  const completedCount = reports.filter((r) => r.status === "completed").length;
+  const processingCount = reports.filter(
     (r) => r.status === "processing"
   ).length;
 
@@ -94,29 +111,18 @@ const LabReports: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <div className=" font-medium flex flex-col items-end mr-10">
-              <span className=" font-medium">{username}</span>
+            <div className="font-medium flex flex-col items-end mr-10">
+              <span className="font-medium">{username}</span>
               <span className="text-neutral-500">{role}</span>
             </div>
-            {/* <span className="text-gray-600 font-medium cursor-pointer hover:text-gray-900">
-              <button className="flex items-center space-x-2 px-4 py-2 bg-green-900 text-white rounded-full font-medium hover:bg-green-700 transition-colors cursor-pointer">
-                Dashboard
-              </button>
-            </span> */}
-
-            {/* <span className="text-gray-600 font-medium cursor-pointer hover:text-gray-900">
-              <button className="flex items-center space-x-2 px-7 py-2 bg-green-900 text-white rounded-full font-medium hover:bg-green-700 transition-colors cursor-pointer">
-                Patients
-              </button>
-            </span> */}
-
-            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-5 ">
+            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-5">
               <img
                 src="vite.svg"
                 alt="Profile"
                 className="w-8 h-8 rounded-full object-cover"
               />
             </div>
+            <LogOut onClick={logout} />
           </div>
         </div>
       </header>
@@ -139,7 +145,6 @@ const LabReports: React.FC = () => {
               <FaSearch className="w-4 h-4" />
               <span>All ({allCount})</span>
             </button>
-
             <button
               onClick={() => setActiveFilter("completed")}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -151,7 +156,6 @@ const LabReports: React.FC = () => {
               <FaCheck className="w-4 h-4" />
               <span>Completed ({completedCount})</span>
             </button>
-
             <button
               onClick={() => setActiveFilter("processing")}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -188,14 +192,20 @@ const LabReports: React.FC = () => {
 
             {/* Table Body */}
             <div className="px-6">
-              {filteredReports.map((report, index) => (
+              {filteredReports.map((report) => (
                 <LabReportRow
-                  key={index}
+                  key={report.id}
                   patient={report.patient}
                   id={report.id}
                   status={report.status}
+                  onChangeStatus={() => handleChangeStatus(report.id)}
                 />
               ))}
+              {filteredReports.length === 0 && (
+                <div className="text-gray-500 text-center py-8">
+                  No reports found.
+                </div>
+              )}
             </div>
           </div>
         </div>

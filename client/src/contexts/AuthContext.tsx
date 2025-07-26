@@ -48,6 +48,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   );
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
 
+  // Track user info in state for easy reset on logout
+  const [username, setUsername] = useState<string | undefined>(undefined);
+  const [email, setEmail] = useState<string | undefined>(undefined);
+  const [role, setRole] = useState<string | undefined>(undefined);
+
   const login = async ({ email, password }: LoginData) => {
     const toastId = toast.loading("Logging in...");
     try {
@@ -79,6 +84,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.removeItem("token");
     setToken(null);
     setIsAuthenticated(false);
+    setUsername(undefined);
+    setEmail(undefined);
+    setRole(undefined);
   };
 
   const validateToken = async (): Promise<User> => {
@@ -89,8 +97,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const response = await GetUserInfo();
     if (response.status === 200) {
       setIsAuthenticated(true);
+      // Set user info to state for controlled reset on logout
+      setUsername(response.data.username);
+      setEmail(response.data.email);
+      setRole(response.data.role);
     }
-    console.log(response.data);
     return response.data;
   };
 
@@ -104,9 +115,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     staleTime: 0,
   });
 
-  const username = userData?.username;
-  const email = userData?.email;
-  const role = userData?.role;
+  // Also update local user state if react-query fetches new data
+  useEffect(() => {
+    if (userData) {
+      setUsername(userData.username);
+      setEmail(userData.email);
+      setRole(userData.role);
+    }
+  }, [userData]);
 
   useEffect(() => {
     if (autherr) {
