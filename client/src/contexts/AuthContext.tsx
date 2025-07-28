@@ -13,6 +13,7 @@ interface User {
   username: string;
   email: string;
   role: string;
+  user_id: string;
 }
 
 interface LoginData {
@@ -27,6 +28,7 @@ interface AuthContextType {
   username?: string;
   email?: string;
   role?: string;
+  user_id?: string;
 }
 
 interface AuthProviderProps {
@@ -40,6 +42,7 @@ const AuthContext = createContext<AuthContextType>({
   username: undefined,
   email: undefined,
   role: undefined,
+  user_id: undefined,
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -52,6 +55,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [username, setUsername] = useState<string | undefined>(undefined);
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [role, setRole] = useState<string | undefined>(undefined);
+  const [user_id, setUserId] = useState<string | undefined>(undefined);
 
   const login = async ({ email, password }: LoginData) => {
     const toastId = toast.loading("Logging in...");
@@ -121,6 +125,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUsername(userData.username);
       setEmail(userData.email);
       setRole(userData.role);
+      setUserId(userData.user_id);
     }
   }, [userData]);
 
@@ -132,7 +137,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return (
     <AuthContext.Provider
-      value={{ login, logout, isAuthenticated, username, email, role }}
+      value={{ login, logout, isAuthenticated, username, email, role, user_id }}
     >
       {children}
     </AuthContext.Provider>

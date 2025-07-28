@@ -1,6 +1,7 @@
 import * as React from "react";
 import { io } from "socket.io-client";
 import type { Socket } from "socket.io-client";
+import { useAuth } from "./AuthContext";
 
 type SocketContextType = Socket | null;
 
@@ -19,8 +20,17 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
-  const socket = React.useMemo(() => io("http://localhost:3000/"), []);
-
+  const { user_id, role } = useAuth();
+  const socket = React.useMemo(
+    () =>
+      io("http://localhost:3000/", {
+        auth: {
+          role,
+          user_id,
+        },
+      }),
+    [role, user_id]
+  );
   return (
     <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
   );
