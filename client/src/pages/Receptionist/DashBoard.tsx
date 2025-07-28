@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaSearch, FaCalendarAlt } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { RecepDoctorAPI, RecepPatientAPI } from "../../utils/api";
 
 const Header: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -90,138 +91,97 @@ const Header: React.FC = () => {
 };
 
 interface Doctor {
-  id: number;
-  name: string;
-  workingHours: string;
   email: string;
-  department: string;
-  status: "Online" | "Offline";
+  doctor: {
+    first_name: string;
+    last_name: string;
+    workingFrom?: string;
+    workingTo?: string;
+    is_online: boolean;
+    doctor_id: string;
+    department?: {
+      name?: string;
+      department_id?: string;
+    };
+  };
 }
 
 interface Patient {
-  id: number;
-  name: string;
-  roomNumber: string;
-  bedAssignment: string;
-  treatmentStatus: "Ongoing" | "Completed" | "In queue";
-  labReportStatus: "Arrived" | "Pending";
+  first_name: string;
+  last_name: string;
+  bed: {
+    bed_number: number;
+  } | null;
+  Appointment: any[];
 }
 
 function Dashboard() {
   const [activeSection, setActiveSection] = useState<"doctor" | "patient">(
     "doctor"
   );
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const doctors: Doctor[] = [
-    {
-      id: 101,
-      name: "Dr. Prabesh Sharma",
-      workingHours: "9 AM - 5 PM",
-      email: "prabesh10@gmail.com",
-      department: "Cardiology",
-      status: "Online",
-    },
-    {
-      id: 102,
-      name: "Dr. Parikshit Sen",
-      workingHours: "10 AM - 6 PM",
-      email: "parikshitsen77@gmail.com",
-      department: "Neurology",
-      status: "Offline",
-    },
-    {
-      id: 103,
-      name: "Dr. Keshav Raj Sharma",
-      workingHours: "8 AM - 4 PM",
-      email: "jdkeshav01@gmail.com",
-      department: "Orthopedics",
-      status: "Online",
-    },
-    {
-      id: 104,
-      name: "Dr. Saimon Neupane",
-      workingHours: "11 AM - 7 PM",
-      email: "saimonbro00007@gmail.com",
-      department: "Pediatrics",
-      status: "Online",
-    },
-    {
-      id: 105,
-      name: "Dr. Risham Raj Byahut",
-      workingHours: "7 AM - 3 PM",
-      email: "rajrisham06@gmail.com",
-      department: "General Medicine",
-      status: "Offline",
-    },
-    {
-      id: 106,
-      name: "Dr. Sijan Bhandari",
-      workingHours: "9 AM - 3 PM",
-      email: "sijan54@gmail.com",
-      department: "Dental",
-      status: "Offline",
-    },
-  ];
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const patients: Patient[] = [
-    {
-      id: 1,
-      name: "Piyush Bhatta",
-      roomNumber: "101",
-      bedAssignment: "Yes - Bed 1",
-      treatmentStatus: "Ongoing",
-      labReportStatus: "Arrived",
-    },
-    {
-      id: 2,
-      name: "Prabesh Ojha",
-      roomNumber: "102",
-      bedAssignment: "No",
-      treatmentStatus: "In queue",
-      labReportStatus: "Pending",
-    },
-    {
-      id: 3,
-      name: "Salon Timilsina",
-      roomNumber: "103",
-      bedAssignment: "Yes - Bed 2",
-      treatmentStatus: "Completed",
-      labReportStatus: "Arrived",
-    },
-    {
-      id: 4,
-      name: "Nimita Paudel",
-      roomNumber: "104",
-      bedAssignment: "No",
-      treatmentStatus: "Ongoing",
-      labReportStatus: "Pending",
-    },
-    {
-      id: 5,
-      name: "Gaurav Bista",
-      roomNumber: "105",
-      bedAssignment: "Yes - Bed 3",
-      treatmentStatus: "In queue",
-      labReportStatus: "Arrived",
-    },
-  ];
+        const [resDoc, resPat] = await Promise.all([
+          RecepDoctorAPI(),
+          RecepPatientAPI(),
+        ]);
+
+        console.log("Doctor API Response:", resDoc.data);
+        console.log("Patient API Response:", resPat);
+
+        // Handle doctors data
+        if (resDoc.data && resDoc.data.doctors) {
+          setDoctors(resDoc.data.doctors);
+        }
+
+        // Handle patients data
+        if (resPat.data && resPat.data.patients) {
+          setPatients(resPat.data.patients);
+        }
+      } catch (err: any) {
+        console.error("API Error:", err);
+        setError(err.message || "Failed to fetch data");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDashboardData();
+  }, []);
 
   const getStatusBadge = (
-    status: string,
+    status: string | boolean | null | undefined,
     type: "status" | "treatment" | "lab" | "bed"
   ) => {
-    const statusLower = status.toLowerCase();
-
     const baseClasses =
       "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium";
 
+    // Handle null/undefined cases
+    if (status === null || status === undefined) {
+      return `${baseClasses} bg-gray-100 text-gray-800`;
+    }
+
     if (type === "status") {
-      return statusLower === "online"
+      const isOnline =
+        typeof status === "boolean"
+          ? status
+          : status.toString().toLowerCase() === "online";
+      return isOnline
         ? `${baseClasses} bg-green-100 text-green-800`
         : `${baseClasses} bg-yellow-100 text-yellow-800`;
     }
 
     if (type === "treatment") {
+      const statusLower = status.toString().toLowerCase();
       switch (statusLower) {
         case "ongoing":
           return `${baseClasses} bg-blue-100 text-blue-800`;
@@ -235,19 +195,92 @@ function Dashboard() {
     }
 
     if (type === "lab") {
+      const statusLower = status.toString().toLowerCase();
       return statusLower === "arrived"
         ? `${baseClasses} bg-green-100 text-green-800`
         : `${baseClasses} bg-yellow-100 text-yellow-800`;
     }
 
     if (type === "bed") {
-      return status.startsWith("Yes")
+      return status && status.toString() !== "No"
         ? `${baseClasses} bg-green-100 text-green-800`
         : `${baseClasses} bg-gray-100 text-gray-800`;
     }
 
     return `${baseClasses} bg-gray-100 text-gray-800`;
   };
+
+  // Helper functions to process patient data
+  const getPatientTreatmentStatus = (patient: Patient): string => {
+    if (patient.Appointment && patient.Appointment.length > 0) {
+      return "Ongoing";
+    }
+    return "In queue";
+  };
+
+  const getPatientBedAssignment = (patient: Patient): string => {
+    if (patient.bed && patient.bed.bed_number) {
+      return `Yes - Bed ${patient.bed.bed_number}`;
+    }
+    return "No";
+  };
+
+  const getPatientRoomNumber = (patient: Patient): string => {
+    if (patient.bed && patient.bed.bed_number) {
+      return `10${patient.bed.bed_number}`;
+    }
+    return "N/A";
+  };
+
+  const formatWorkingHours = (
+    workingFrom: string | undefined,
+    workingTo: string | undefined
+  ): string => {
+    if (!workingFrom || !workingTo) {
+      return "N/A";
+    }
+
+    const formatHour = (hour: string) => {
+      const num = parseInt(hour);
+      if (isNaN(num)) return "N/A";
+
+      // Handle 24-hour format
+      if (num === 0) return "12 AM";
+      if (num < 12) return `${num} AM`;
+      if (num === 12) return "12 PM";
+      return `${num - 12} PM`;
+    };
+
+    return `${formatHour(workingFrom)} - ${formatHour(workingTo)}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-lg text-gray-600">
+              Loading dashboard data...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-lg text-red-600">Error: {error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -321,44 +354,56 @@ function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {doctors.map((doctor) => (
+                  {doctors.map((doctorRecord) => (
                     <tr
-                      key={doctor.id}
+                      key={doctorRecord.doctor.doctor_id}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-4 py-3">
                         <div className="font-medium text-gray-900">
-                          {doctor.name}
+                          Dr. {doctorRecord.doctor.first_name}{" "}
+                          {doctorRecord.doctor.last_name}
                         </div>
                         <div className="text-sm text-gray-500 lg:hidden">
-                          {doctor.department}
+                          {doctorRecord.doctor.department?.name || "N/A"}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
-                        {doctor.workingHours}
+                        {formatWorkingHours(
+                          doctorRecord.doctor.workingFrom,
+                          doctorRecord.doctor.workingTo
+                        )}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 hidden md:table-cell">
                         <a
-                          href={`mailto:${doctor.email}`}
+                          href={`mailto:${doctorRecord.email}`}
                           className="hover:text-green-600 transition-colors"
                         >
-                          {doctor.email}
+                          {doctorRecord.email}
                         </a>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 hidden lg:table-cell">
-                        {doctor.department}
+                        {doctorRecord.doctor.department?.name || "N/A"}
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={getStatusBadge(doctor.status, "status")}
+                          className={getStatusBadge(
+                            doctorRecord.doctor.is_online,
+                            "status"
+                          )}
                         >
-                          {doctor.status}
+                          {doctorRecord.doctor.is_online ? "Online" : "Offline"}
                         </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {doctors.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No doctors found
+                </div>
+              )}
             </div>
           )}
 
@@ -401,59 +446,59 @@ function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {patients.map((patient) => (
+                  {patients.map((patient, index) => (
                     <tr
-                      key={patient.id}
+                      key={index}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-4 py-3">
                         <div className="font-medium text-gray-900">
-                          {patient.name}
+                          {patient.first_name} {patient.last_name}
                         </div>
                         <div className="text-sm text-gray-500 md:hidden">
-                          {patient.bedAssignment}
+                          {getPatientBedAssignment(patient)}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
-                        {patient.roomNumber}
+                        {getPatientRoomNumber(patient)}
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         <span
                           className={getStatusBadge(
-                            patient.bedAssignment,
+                            getPatientBedAssignment(patient),
                             "bed"
                           )}
                         >
-                          {patient.bedAssignment}
+                          {getPatientBedAssignment(patient)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <span
                           className={getStatusBadge(
-                            patient.treatmentStatus,
+                            getPatientTreatmentStatus(patient),
                             "treatment"
                           )}
                         >
-                          {patient.treatmentStatus}
+                          {getPatientTreatmentStatus(patient)}
                         </span>
                         <div className="text-sm text-gray-500 lg:hidden mt-1">
-                          Lab: {patient.labReportStatus}
+                          Lab: Pending
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
-                        <span
-                          className={getStatusBadge(
-                            patient.labReportStatus,
-                            "lab"
-                          )}
-                        >
-                          {patient.labReportStatus}
+                        <span className={getStatusBadge("Pending", "lab")}>
+                          Pending
                         </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {patients.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No patients found
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -476,7 +521,7 @@ function Dashboard() {
               <div>
                 <p className="text-sm text-gray-600">Online Doctors</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {doctors.filter((d) => d.status === "Online").length}
+                  {doctors.filter((d) => d.doctor.is_online).length}
                 </p>
               </div>
               <Activity className="w-6 h-6 text-blue-500" />
@@ -498,10 +543,7 @@ function Dashboard() {
               <div>
                 <p className="text-sm text-gray-600">Beds Occupied</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {
-                    patients.filter((p) => p.bedAssignment.startsWith("Yes"))
-                      .length
-                  }
+                  {patients.filter((p) => p.bed && p.bed.bed_number).length}
                 </p>
               </div>
               <Bed className="w-6 h-6 text-orange-500" />
