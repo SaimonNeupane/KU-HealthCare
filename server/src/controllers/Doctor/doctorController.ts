@@ -138,7 +138,6 @@ export const bedQuery = AsyncError(
 
 export const completeDiagnosis = AsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-   
     let updatedLabReport = null;
     let updatedBed = null;
 
@@ -168,7 +167,7 @@ export const completeDiagnosis = AsyncError(
         patientId: req.params.id,
       },
     });
-    let updatedAppointment=appointment
+    let updatedAppointment = appointment;
     if (!!appointment) {
       updatedAppointment = await prisma.appointment.update({
         where: {
