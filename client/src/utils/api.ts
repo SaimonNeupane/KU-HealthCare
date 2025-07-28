@@ -44,4 +44,7 @@ export const ShowDoctorsAPI = (dep_id: string) =>
 export const LabAssistantAPI = () => baseURL.get("/lab/labreport");
 
 export const RecepPatientAPI = () => baseURL.get("/receptionist/patient");
+
 export const RecepDoctorAPI = () => baseURL.get("/receptionist/dashboard");
+
+export const DoctorPatientAPI = () => baseURL.get("/doctor/patientdetails");
