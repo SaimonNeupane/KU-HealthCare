@@ -15,7 +15,7 @@ import initializeSocket from "./services/socketServer";
 
 const app: Express = express();
 
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 const httpServer = http.createServer(app);
 
 initializeSocket(httpServer);
@@ -44,6 +44,6 @@ app.use((req: Request, res: Response, next: NextFunction): any => {
 
 app.use(GlobalError);
 
-httpServer.listen(port, () => {
+httpServer.listen(port, "0.0.0.0", () => {
   console.log(`Server is running at http://localhost:${port}`);
 });

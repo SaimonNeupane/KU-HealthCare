@@ -1,4 +1,5 @@
 import axios from "axios";
+const apiUrl = import.meta.env.VITE_URL;
 
 interface loginDataType {
   email: string;
@@ -20,7 +21,7 @@ interface patientDataType {
 }
 
 const baseURL = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: apiUrl,
 });
 
 export const PateintDetials = () => baseURL.get("/receptionist/patient");

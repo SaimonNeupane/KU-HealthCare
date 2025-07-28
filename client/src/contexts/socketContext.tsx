@@ -3,6 +3,8 @@ import { io } from "socket.io-client";
 import type { Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 
+const apiUrl = import.meta.env.VITE_URL;
+
 type SocketContextType = Socket | null;
 
 const SocketContext = React.createContext<SocketContextType>(null);
@@ -23,7 +25,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const { user_id, role } = useAuth();
   const socket = React.useMemo(
     () =>
-      io("http://localhost:3000/", {
+      io(apiUrl, {
         auth: {
           role,
           user_id,
