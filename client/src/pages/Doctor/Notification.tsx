@@ -7,6 +7,8 @@ import {
   FaUser,
 } from "react-icons/fa";
 import { useSocket } from "../../contexts/socketContext";
+import { LogOut } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface NotificationItemProps {
   icon: React.ReactNode;
@@ -62,54 +64,19 @@ const Notification: React.FC = () => {
       console.log(patientName);
     });
   }, [socket]);
+  const { logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center">
-              <span className="text-white font-bold text-sm">KU</span>
-            </div>
-            <span className="text-gray-900 font-semibold text-lg">
-              KU HealthCare
-            </span>
-          </div>
-
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 cursor-pointer">
-              <FaBell className="w-5 h-5" />
-              <span className="font-medium">Notifications</span>
-            </div>
-
-            <div className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 cursor-pointer">
-              <FaUser className="w-5 h-5" />
-              <span className="font-medium">My patients</span>
-            </div>
-
-            <button className="p-2 text-gray-600 hover:text-gray-900">
-              <FaCog className="w-5 h-5" />
-            </button>
-
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <img
-                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face"
-                alt="Profile"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="px-6 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            Notifications
-          </h1>
-
+          <div className="flex flex:col justify-between ">
+            <h1 className="text-3xl font-bold text-gray-900 mb-8">
+              Notifications
+            </h1>
+            <LogOut onClick={logout} />
+          </div>
           <div className="space-y-3">
             {!!name ? (
               <NotificationItem
