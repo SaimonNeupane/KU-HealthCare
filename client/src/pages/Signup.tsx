@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { Eye, EyeOff, ChevronDown, Hospital } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Eye, EyeOff, Hospital } from "lucide-react";
+import { useParams } from "react-router";
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -13,11 +15,19 @@ function Signup() {
   const [formErrors, setFormErrors] = useState({
     fullName: false,
     email: false,
+    phone: false,
     password: false,
     confirmPassword: false,
     userRole: false,
-    passwordMatch: false
+    passwordMatch: false,
   });
+  const { role } = useParams();
+
+  useEffect(() => {
+    console.log(role);
+    if (!role) return;
+    setUserRole(role);
+  }, []);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -34,7 +44,11 @@ function Signup() {
       password: password.trim() === "",
       confirmPassword: confirmPassword.trim() === "",
       userRole: userRole.trim() === "",
-      passwordMatch: password !== confirmPassword && password.trim() !== "" && confirmPassword.trim() !== ""
+      phone: phone.trim() === "",
+      passwordMatch:
+        password !== confirmPassword &&
+        password.trim() !== "" &&
+        confirmPassword.trim() !== "",
     };
 
     setFormErrors(errors);
@@ -44,16 +58,19 @@ function Signup() {
   const handleSignup = () => {
     if (validateForm()) {
       // poxi api call garne
-      alert("Submitted")
-      console.log("Signup attempt with:", { fullName, email, password, confirmPassword, userRole });
+      alert("Submitted");
+      console.log("Signup attempt with:", {
+        fullName,
+        email,
+        password,
+        confirmPassword,
+        userRole,
+      });
     }
   };
 
-  const userRoles = ["Admin", "Doctor", "Lab Technician", "Receptionist"];
-
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center py-8 px-4">
         {/* Hospital Icon Banner */}
@@ -64,13 +81,18 @@ function Signup() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             {/* <span className="font-bold text-xl text-green-600 px-5 py-3">KU HealthCare</span> */}
-            <h1 className="text-2xl font-semibold text-gray-800">Create your account</h1>
+            <h1 className="text-2xl font-semibold text-gray-800">
+              Create your account
+            </h1>
           </div>
 
           <div className="space-y-6">
             {/* Full Name field */}
             <div className="space-y-2">
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="fullName"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Full Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -84,18 +106,24 @@ function Signup() {
                   }
                 }}
                 placeholder="Enter your full name"
-                className={`w-full px-3 py-2 rounded-md bg-white border ${formErrors.fullName ? "border-red-500" : "border-gray-200"
-                  } focus:outline-none focus:ring-2 focus:ring-green-500`}
+                className={`w-full px-3 py-2 rounded-md bg-white border ${
+                  formErrors.fullName ? "border-red-500" : "border-gray-200"
+                } focus:outline-none focus:ring-2 focus:ring-green-500 placeholder:text-gray-500`}
                 required
               />
               {formErrors.fullName && (
-                <p className="text-red-500 text-xs mt-1">Full name is required</p>
+                <p className="text-red-500 text-xs mt-1">
+                  Full name is required
+                </p>
               )}
             </div>
 
             {/* Email field */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email <span className="text-red-500">*</span>
               </label>
               <input
@@ -109,8 +137,9 @@ function Signup() {
                   }
                 }}
                 placeholder="Enter your email address"
-                className={`w-full px-3 py-2 rounded-md bg-white border ${formErrors.email ? "border-red-500" : "border-gray-200"
-                  } focus:outline-none focus:ring-2 focus:ring-green-500`}
+                className={`placeholder:text-gray-500 w-full px-3 py-2 rounded-md bg-white border ${
+                  formErrors.email ? "border-red-500" : "border-gray-200"
+                } focus:outline-none focus:ring-2 focus:ring-green-500`}
                 required
               />
               {formErrors.email && (
@@ -118,9 +147,40 @@ function Signup() {
               )}
             </div>
 
+            <div className="space-y-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="phone"
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  if (e.target.value.trim() !== "") {
+                    setFormErrors({ ...formErrors, phone: false });
+                  }
+                }}
+                placeholder="Enter your Phone Number"
+                className={`w-full px-3 py-2 rounded-md bg-white border ${
+                  formErrors.phone ? "border-red-500" : "border-gray-200"
+                } focus:outline-none focus:ring-2 focus:ring-green-500 placeholder:text-gray-500`}
+                required
+              />
+              {formErrors.phone && (
+                <p className="text-red-500 text-xs mt-1">Phone is required</p>
+              )}
+            </div>
+
             {/* Password field */}
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -135,8 +195,9 @@ function Signup() {
                     }
                   }}
                   placeholder="Enter your password"
-                  className={`w-full px-3 py-2 rounded-md bg-white border ${formErrors.password ? "border-red-500" : "border-gray-200"
-                    } focus:outline-none focus:ring-2 focus:ring-green-500`}
+                  className={`placeholder:text-gray-500 w-full px-3 py-2 rounded-md bg-white border ${
+                    formErrors.password ? "border-red-500" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-green-500`}
                   required
                 />
                 <button
@@ -148,13 +209,18 @@ function Signup() {
                 </button>
               </div>
               {formErrors.password && (
-                <p className="text-red-500 text-xs mt-1">Password is required</p>
+                <p className="text-red-500 text-xs mt-1">
+                  Password is required
+                </p>
               )}
             </div>
 
             {/* Confirm Password field */}
             <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Confirm Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -169,8 +235,11 @@ function Signup() {
                     }
                   }}
                   placeholder="Enter your password again"
-                  className={`w-full px-3 py-2 rounded-md bg-white border ${formErrors.confirmPassword || formErrors.passwordMatch ? "border-red-500" : "border-gray-200"
-                    } focus:outline-none focus:ring-2 focus:ring-green-500`}
+                  className={`placeholder:text-gray-500 w-full px-3 py-2 rounded-md bg-white border ${
+                    formErrors.confirmPassword || formErrors.passwordMatch
+                      ? "border-red-500"
+                      : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-green-500`}
                   required
                 />
                 <button
@@ -178,35 +247,49 @@ function Signup() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                   onClick={toggleConfirmPasswordVisibility}
                 >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
                 </button>
               </div>
               {formErrors.confirmPassword && (
-                <p className="text-red-500 text-xs mt-1">Confirm password is required</p>
+                <p className="text-red-500 text-xs mt-1">
+                  Confirm password is required
+                </p>
               )}
               {formErrors.passwordMatch && (
-                <p className="text-red-500 text-xs mt-1">Passwords do not match</p>
+                <p className="text-red-500 text-xs mt-1">
+                  Passwords do not match
+                </p>
               )}
             </div>
 
             {/* User Role Dropdown */}
             <div className="space-y-2">
-              <label htmlFor="userRole" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="userRole"
+                className="block text-sm font-medium text-gray-700"
+              >
                 User Role <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div
                   onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                  className={`w-full px-3 py-2 rounded-md bg-white border ${formErrors.userRole ? "border-red-500" : "border-gray-200"
-                    } focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer flex justify-between items-center`}
+                  className={`w-full px-3 py-2 rounded-md bg-white border ${
+                    formErrors.userRole ? "border-red-500" : "border-gray-200"
+                  } focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer flex justify-between items-center`}
                 >
-                  <span className={userRole ? "text-gray-900" : "text-gray-500"}>
+                  <span
+                    className={userRole ? "text-gray-900" : "text-gray-500"}
+                  >
                     {userRole || "Select a Role"}
                   </span>
-                  <ChevronDown size={20} className="text-gray-400" />
+                  {/* <ChevronDown size={20} className="text-gray-400" /> */}
                 </div>
 
-                {showRoleDropdown && (
+                {/* {showRoleDropdown && (
                   <div className="absolute mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10">
                     {userRoles.map((role) => (
                       <div
@@ -222,10 +305,12 @@ function Signup() {
                       </div>
                     ))}
                   </div>
-                )}
+                )} */}
               </div>
               {formErrors.userRole && (
-                <p className="text-red-500 text-xs mt-1">User role is required</p>
+                <p className="text-red-500 text-xs mt-1">
+                  User role is required
+                </p>
               )}
             </div>
 
@@ -235,11 +320,11 @@ function Signup() {
                 onClick={handleSignup}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
-                Sign up
+                {`Add ${role}`}
               </button>
             </div>
 
-            {/* Login link */}
+            {/* Login link
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
@@ -247,7 +332,7 @@ function Signup() {
                   Login
                 </a>
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </main>

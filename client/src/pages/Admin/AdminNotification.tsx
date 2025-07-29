@@ -1,5 +1,3 @@
-import { FaUserMd, FaFileAlt } from "react-icons/fa";
-import { IoManOutline } from "react-icons/io5";
 import { useSocket } from "../../contexts/socketContext";
 import { useEffect, useState } from "react";
 

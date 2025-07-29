@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaSearch, FaCalendarAlt } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { RecepDoctorAPI, RecepPatientAPI } from "../../utils/api";
+import { useQuery } from "@tanstack/react-query";
 
 const Header: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -115,48 +116,69 @@ interface Patient {
   Appointment: any[];
 }
 
+interface DashboardData {
+  doctors: Doctor[];
+  patients: Patient[];
+}
+
+// Custom hooks for data fetching
+const useDoctorsQuery = () => {
+  return useQuery({
+    queryKey: ["doctors"],
+    queryFn: async (): Promise<Doctor[]> => {
+      const response = await RecepDoctorAPI();
+      console.log("Doctor API Response:", response.data);
+      return response.data?.doctors || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    retry: 3,
+  });
+};
+
+const usePatientsQuery = () => {
+  return useQuery({
+    queryKey: ["patients"],
+    queryFn: async (): Promise<Patient[]> => {
+      const response = await RecepPatientAPI();
+      console.log("Patient API Response:", response);
+      return response.data?.patients || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    retry: 3,
+  });
+};
+
+// Combined dashboard data hook
+const useDashboardData = () => {
+  const doctorsQuery = useDoctorsQuery();
+  const patientsQuery = usePatientsQuery();
+
+  return {
+    doctors: doctorsQuery.data || [],
+    patients: patientsQuery.data || [],
+    isLoading: doctorsQuery.isLoading || patientsQuery.isLoading,
+    isError: doctorsQuery.isError || patientsQuery.isError,
+    error: doctorsQuery.error || patientsQuery.error,
+    refetchDoctors: doctorsQuery.refetch,
+    refetchPatients: patientsQuery.refetch,
+    refetchAll: async () => {
+      await Promise.all([doctorsQuery.refetch(), patientsQuery.refetch()]);
+    },
+  };
+};
+
 function Dashboard() {
   const [activeSection, setActiveSection] = useState<"doctor" | "patient">(
     "doctor"
   );
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchDashboardData() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const [resDoc, resPat] = await Promise.all([
-          RecepDoctorAPI(),
-          RecepPatientAPI(),
-        ]);
-
-        console.log("Doctor API Response:", resDoc.data);
-        console.log("Patient API Response:", resPat);
-
-        // Handle doctors data
-        if (resDoc.data && resDoc.data.doctors) {
-          setDoctors(resDoc.data.doctors);
-        }
-
-        // Handle patients data
-        if (resPat.data && resPat.data.patients) {
-          setPatients(resPat.data.patients);
-        }
-      } catch (err: any) {
-        console.error("API Error:", err);
-        setError(err.message || "Failed to fetch data");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchDashboardData();
-  }, []);
+  // Use TanStack Query for data fetching
+  const { doctors, patients, isLoading, isError, error, refetchAll } =
+    useDashboardData();
 
   const getStatusBadge = (
     status: string | boolean | null | undefined,
@@ -254,14 +276,17 @@ function Dashboard() {
     return `${formatHour(workingFrom)} - ${formatHour(workingTo)}`;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-center h-64">
-            <div className="text-lg text-gray-600">
-              Loading dashboard data...
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-2"></div>
+              <div className="text-lg text-gray-600">
+                Loading dashboard data...
+              </div>
             </div>
           </div>
         </div>
@@ -269,13 +294,23 @@ function Dashboard() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-center h-64">
-            <div className="text-lg text-red-600">Error: {error}</div>
+            <div className="text-center">
+              <div className="text-lg text-red-600 mb-4">
+                Error: {error?.message || "Failed to load dashboard data"}
+              </div>
+              <button
+                onClick={() => refetchAll()}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -287,6 +322,17 @@ function Dashboard() {
       <Header />
 
       <div className="container mx-auto px-4 py-6">
+        {/* Header with Refresh Button */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <button
+            onClick={() => refetchAll()}
+            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          >
+            Refresh Data
+          </button>
+        </div>
+
         {/* Toggle Buttons */}
         <div className="flex mb-6 bg-white rounded-lg p-1 shadow-sm border border-gray-200 max-w-2xl mx-auto">
           <button
