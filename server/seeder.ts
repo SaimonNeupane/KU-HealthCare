@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Starting database seeding...");
 
-  // Clear existing data
+  // Clear existing data in correct order (respecting foreign key constraints)
   await prisma.labTest.deleteMany();
   await prisma.appointment.deleteMany();
   await prisma.patient.deleteMany();
@@ -18,7 +18,21 @@ async function main() {
   await prisma.department.deleteMany();
   await prisma.user.deleteMany();
 
-  // Create Departments
+  console.log("Cleared existing data...");
+
+  // Create Admin User FIRST
+  const adminUser = await prisma.user.create({
+    data: {
+      username: "admin",
+      email: "admin@example.com",
+      password: "secure1234",
+      role: "admin",
+    },
+  });
+
+  console.log("Created admin user...");
+
+  // Create 10 Departments
   const departments = await Promise.all([
     prisma.department.create({
       data: {
@@ -82,13 +96,15 @@ async function main() {
     }),
   ]);
 
-  // Create Rooms (10 rooms per department)
+  console.log("Created 10 departments...");
+
+  // Create 20 Rooms (2 rooms per department)
   const rooms: any[] = [];
   for (let deptIndex = 0; deptIndex < departments.length; deptIndex++) {
-    for (let roomNum = 1; roomNum <= 10; roomNum++) {
+    for (let roomNum = 1; roomNum <= 2; roomNum++) {
       const room = await prisma.room.create({
         data: {
-          room_number: deptIndex * 100 + roomNum + 100, // 101-110, 201-210, etc.
+          room_number: deptIndex * 100 + roomNum + 100, // 101-102, 201-202, etc.
           status: Math.random() > 0.2 ? "available" : "occupied",
           departmentId: departments[deptIndex].department_id,
         },
@@ -97,8 +113,10 @@ async function main() {
     }
   }
 
+  console.log("Created 20 rooms...");
+
   // Create Users and related entities
-  const users: any[] = [];
+  const users: any[] = [adminUser]; // Include admin user in the users array
   const doctors: any[] = [];
   const labAssistants: any[] = [];
   const receptionists: any[] = [];
@@ -154,56 +172,6 @@ async function main() {
     "Mukesh",
     "Lokesh",
     "Yogesh",
-    "Pooja",
-    "Puja",
-    "Nisha",
-    "Risha",
-    "Asha",
-    "Usha",
-    "Seema",
-    "Reema",
-    "Hema",
-    "Prema",
-    "Arjun",
-    "Varun",
-    "Tarun",
-    "Kiran",
-    "Raman",
-    "Gagan",
-    "Magan",
-    "Chetan",
-    "Rohan",
-    "Sohan",
-    "Neha",
-    "Sneha",
-    "Meera",
-    "Veera",
-    "Leela",
-    "Sheela",
-    "Geeta",
-    "Beeta",
-    "Neeta",
-    "Seeta",
-    "Ravi",
-    "Shiv",
-    "Dev",
-    "Tej",
-    "Ved",
-    "Yash",
-    "Nash",
-    "Harsh",
-    "Darsh",
-    "Sparsh",
-    "Nitu",
-    "Ritu",
-    "Minu",
-    "Tinu",
-    "Sonu",
-    "Monu",
-    "Gonu",
-    "Ponu",
-    "Konu",
-    "Bonu",
   ];
 
   const lastNames = [
@@ -237,26 +205,6 @@ async function main() {
     "Dahal",
     "Nepal",
     "Bhandari",
-    "Pokhrel",
-    "Rijal",
-    "Sapkota",
-    "Pant",
-    "Kharel",
-    "Bohara",
-    "Devkota",
-    "Gautam",
-    "Maharjan",
-    "Manandhar",
-    "Singh",
-    "Kumar",
-    "Prasad",
-    "Lal",
-    "Das",
-    "Roy",
-    "Sah",
-    "Yadav",
-    "Mandal",
-    "Thakur",
   ];
 
   const specializations = [
@@ -296,9 +244,13 @@ async function main() {
     return `${prefix}${remaining}`;
   }
 
-  // Create doctors (10 per department)
+  // Create 20 doctors (2 per department)
   for (let deptIndex = 0; deptIndex < departments.length; deptIndex++) {
-    for (let i = 0; i < 10; i++) {
+    const departmentRooms = rooms.filter(
+      (r) => r.departmentId === departments[deptIndex].department_id
+    );
+
+    for (let i = 0; i < 2; i++) {
       const firstName = firstNames[userIndex % firstNames.length];
       const lastName = lastNames[userIndex % lastNames.length];
       const username = `${firstName.toLowerCase()}-${lastName.toLowerCase()}-${userIndex}`;
@@ -313,6 +265,9 @@ async function main() {
       });
       users.push(user);
 
+      // Assign doctor to a room in their department
+      const assignedRoom = departmentRooms[i % departmentRooms.length];
+
       const doctor = await prisma.doctor.create({
         data: {
           first_name: firstName,
@@ -321,7 +276,7 @@ async function main() {
           is_online: Math.random() > 0.3,
           departmentId: departments[deptIndex].department_id,
           userId: user.user_id,
-          roomId: rooms[deptIndex * 10 + (i % 10)].room_id,
+          roomId: assignedRoom.room_id,
           workingFrom: `${8 + (i % 3)}:00`,
           workingTo: `${16 + (i % 3)}:00`,
           phone: generatePhoneNumber(userIndex),
@@ -332,69 +287,71 @@ async function main() {
     }
   }
 
-  // Create lab assistants (10 per department)
-  for (let deptIndex = 0; deptIndex < departments.length; deptIndex++) {
-    for (let i = 0; i < 10; i++) {
-      const firstName = firstNames[userIndex % firstNames.length];
-      const lastName = lastNames[userIndex % lastNames.length];
-      const username = `${firstName.toLowerCase()}-${lastName.toLowerCase()}-${userIndex}`;
+  console.log("Created 20 doctors...");
 
-      const user = await prisma.user.create({
-        data: {
-          username,
-          email: `${username}@hospital.com`,
-          password: "password123",
-          role: "lab_assistant",
-        },
-      });
-      users.push(user);
+  // Create 10 lab assistants
+  for (let i = 0; i < 10; i++) {
+    const firstName = firstNames[userIndex % firstNames.length];
+    const lastName = lastNames[userIndex % lastNames.length];
+    const username = `${firstName.toLowerCase()}-${lastName.toLowerCase()}-${userIndex}`;
 
-      const labAssistant = await prisma.labAssistant.create({
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          userId: user.user_id,
-        },
-      });
-      labAssistants.push(labAssistant);
-      userIndex++;
-    }
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email: `${username}@hospital.com`,
+        password: "password123",
+        role: "lab_assistant",
+      },
+    });
+    users.push(user);
+
+    const labAssistant = await prisma.labAssistant.create({
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        userId: user.user_id,
+      },
+    });
+    labAssistants.push(labAssistant);
+    userIndex++;
   }
 
-  // Create receptionists (10 per department)
-  for (let deptIndex = 0; deptIndex < departments.length; deptIndex++) {
-    for (let i = 0; i < 10; i++) {
-      const firstName = firstNames[userIndex % firstNames.length];
-      const lastName = lastNames[userIndex % lastNames.length];
-      const username = `${firstName.toLowerCase()}-${lastName.toLowerCase()}-${userIndex}`;
+  console.log("Created 10 lab assistants...");
 
-      const user = await prisma.user.create({
-        data: {
-          username,
-          email: `${username}@hospital.com`,
-          password: "password123",
-          role: "receptionist",
-        },
-      });
-      users.push(user);
+  // Create 3 receptionists
+  for (let i = 0; i < 3; i++) {
+    const firstName = firstNames[userIndex % firstNames.length];
+    const lastName = lastNames[userIndex % lastNames.length];
+    const username = `${firstName.toLowerCase()}-${lastName.toLowerCase()}-${userIndex}`;
 
-      const receptionist = await prisma.receptionist.create({
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          userId: user.user_id,
-          phone: generatePhoneNumber(userIndex + 100000),
-        },
-      });
-      receptionists.push(receptionist);
-      userIndex++;
-    }
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email: `${username}@hospital.com`,
+        password: "password123",
+        role: "receptionist",
+      },
+    });
+    users.push(user);
+
+    const receptionist = await prisma.receptionist.create({
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        userId: user.user_id,
+        phone: generatePhoneNumber(userIndex + 100000),
+      },
+    });
+    receptionists.push(receptionist);
+    userIndex++;
   }
 
-  // Create Beds (200 beds)
+  console.log("Created 3 receptionists...");
+
+  // Create 50 beds
   const beds: any[] = [];
   const bedStatuses = ["occupied", "available", "maintenance", "reserved"];
-  for (let i = 1; i <= 200; i++) {
+  for (let i = 1; i <= 50; i++) {
     const bed = await prisma.bed.create({
       data: {
         bed_number: i,
@@ -404,7 +361,9 @@ async function main() {
     beds.push(bed);
   }
 
-  // Create Patients (500 patients)
+  console.log("Created 50 beds...");
+
+  // Create 50 patients
   const patients: any[] = [];
   const genders = ["Male", "Female", "Other"];
   const addresses = [
@@ -425,14 +384,14 @@ async function main() {
     "Damak, Nepal",
   ];
 
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 50; i++) {
     const firstName = firstNames[i % firstNames.length];
     const lastName = lastNames[i % lastNames.length];
     const availableBeds = beds.filter(
       (bed) => bed.status === "available" || bed.status === "occupied"
     );
     const bedId =
-      Math.random() > 0.3 && availableBeds.length > 0
+      Math.random() > 0.4 && availableBeds.length > 0
         ? availableBeds[Math.floor(Math.random() * availableBeds.length)].bed_id
         : null;
 
@@ -452,7 +411,9 @@ async function main() {
     patients.push(patient);
   }
 
-  // Create Appointments (1000 appointments)
+  console.log("Created 50 patients...");
+
+  // Create 50 appointments
   const appointments: any[] = [];
   const appointmentStatuses = [
     "scheduled",
@@ -462,17 +423,19 @@ async function main() {
     "waiting",
   ];
 
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 50; i++) {
     const patient = patients[Math.floor(Math.random() * patients.length)];
     const doctor = doctors[Math.floor(Math.random() * doctors.length)];
-    const departmentRooms = rooms.filter(
-      (r) => r.departmentId === doctor.departmentId
-    );
-    const room =
-      departmentRooms[Math.floor(Math.random() * departmentRooms.length)];
+
+    // Ensure room belongs to the same department as the doctor
+    const doctorRoom = rooms.find((r) => r.room_id === doctor.roomId);
+    if (!doctorRoom) {
+      console.error(`No room found for doctor ${doctor.doctor_id}`);
+      continue;
+    }
 
     // Generate appointment times over the last 30 days and next 30 days
-    const baseTime = new Date("2025-07-29T15:45:57Z");
+    const baseTime = new Date("2025-07-29T16:18:31Z");
     const randomDays = Math.floor(Math.random() * 60) - 30; // -30 to +30 days
     const randomHours = Math.floor(Math.random() * 10) + 8; // 8 AM to 6 PM
     const randomMinutes = Math.floor(Math.random() * 4) * 15; // 0, 15, 30, 45 minutes
@@ -485,7 +448,7 @@ async function main() {
       data: {
         patientId: patient.patient_id,
         doctorId: doctor.doctor_id,
-        roomId: room.room_id,
+        roomId: doctorRoom.room_id,
         departmentId: doctor.departmentId,
         appointment_time: appointmentTime,
         status:
@@ -498,7 +461,9 @@ async function main() {
     appointments.push(appointment);
   }
 
-  // Create Lab Tests (800 lab tests)
+  console.log("Created 50 appointments...");
+
+  // Create 25 lab tests
   const labTests: any[] = [];
   const testStatuses = ["pending", "in-progress", "completed", "cancelled"];
   const testResults = [
@@ -512,7 +477,7 @@ async function main() {
     "Outside Range",
   ];
 
-  for (let i = 0; i < 800; i++) {
+  for (let i = 0; i < 25; i++) {
     const appointment =
       appointments[Math.floor(Math.random() * appointments.length)];
     const labAssistant =
@@ -546,8 +511,10 @@ async function main() {
     labTests.push(labTest);
   }
 
-  // Create Notifications (500 notifications)
-  for (let i = 0; i < 500; i++) {
+  console.log("Created 25 lab tests...");
+
+  // Create 50 notifications
+  for (let i = 0; i < 50; i++) {
     const sender = users[Math.floor(Math.random() * users.length)];
     const recipient = users[Math.floor(Math.random() * users.length)];
 
@@ -562,9 +529,11 @@ async function main() {
     }
   }
 
-  console.log("Database seeding completed successfully!");
+  console.log("Created 50 notifications...");
+
+  console.log("\n=== DATABASE SEEDING COMPLETED SUCCESSFULLY! ===");
   console.log(`Created:`);
-  console.log(`- ${users.length} Users`);
+  console.log(`- ${users.length} Users (including admin)`);
   console.log(`- ${departments.length} Departments`);
   console.log(`- ${rooms.length} Rooms`);
   console.log(`- ${doctors.length} Doctors`);
@@ -574,14 +543,24 @@ async function main() {
   console.log(`- ${patients.length} Patients`);
   console.log(`- ${appointments.length} Appointments`);
   console.log(`- ${labTests.length} Lab Tests`);
-  console.log(`- 500 Notifications`);
+  console.log(`- 50 Notifications`);
 
   // Display login credentials
+  const prabeshDoctor = doctors.find(
+    (d) => d.first_name === "Prabesh" && d.last_name === "Sharma"
+  );
   console.log(`\n=== LOGIN CREDENTIALS ===`);
-  console.log(`Username: prabesh-sharma-0`);
-  console.log(`Password: password123`);
-  console.log(`Role: doctor`);
-  console.log(`Phone: ${doctors[0]?.phone || "N/A"}`);
+  console.log(`ADMIN:`);
+  console.log(`  Username: admin`);
+  console.log(`  Email: admin@example.com`);
+  console.log(`  Password: secure1234`);
+  console.log(`  Role: admin`);
+  console.log(`\nDOCTOR (Prabesh-Sharma):`);
+  console.log(`  Username: prabesh-sharma-0`);
+  console.log(`  Password: password123`);
+  console.log(`  Role: doctor`);
+  console.log(`  Phone: ${prabeshDoctor?.phone || "N/A"}`);
+  console.log(`  Department: ${departments[0]?.name || "General Medicine"}`);
   console.log(`========================`);
 }
 
