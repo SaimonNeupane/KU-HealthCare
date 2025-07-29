@@ -21,7 +21,7 @@ const LabReportRow: React.FC<LabReportRowProps> = ({
   status,
   onChangeStatus,
 }) => (
-  <div className="grid grid-cols-3 gap-8 items-center py-4 border-b border-gray-100">
+  <div className="grid grid-cols-3 gap-8 items-center py-4 border-b border-gray-100 selection:text-amber-700 selection:bg-fuchsia-300">
     <div className="text-gray-900 font-medium">{patient}</div>
     <div className="text-gray-500">{id}</div>
     <div>
