@@ -136,4 +136,8 @@ export const receptionists=AsyncError(async(req:Request,res:Response,next:NextFu
     
     }
   })
+  return res.status(200) .json({
+    status: "success",
+    receptionists: receptionist,
+  });
 })
