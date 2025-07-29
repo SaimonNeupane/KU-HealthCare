@@ -14,7 +14,14 @@ function App() {
       <Route element={<MainLayout />}></Route>
       <Route path="/*" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+      <Route
+        path="/signup/:role*"
+        element={
+          <ProtectedRoute>
+            <Signup />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/receptionist/*"

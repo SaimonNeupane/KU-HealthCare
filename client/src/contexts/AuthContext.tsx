@@ -101,7 +101,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const response = await GetUserInfo();
     if (response.status === 200) {
       setIsAuthenticated(true);
-      // Set user info to state for controlled reset on logout
       setUsername(response.data.username);
       setEmail(response.data.email);
       setRole(response.data.role);

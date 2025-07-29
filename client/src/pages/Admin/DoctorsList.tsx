@@ -1,6 +1,8 @@
 import { Edit, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export default function DoctorsList() {
+  const navigate = useNavigate();
   const doctors = [
     {
       id: 1,
@@ -54,7 +56,10 @@ export default function DoctorsList() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-4xl font-bold text-gray-800">List of Doctors</h1>
-        <button className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+        <button
+          className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          onClick={() => navigate("/signup/doctor")}
+        >
           + Add Doctor
         </button>
       </div>

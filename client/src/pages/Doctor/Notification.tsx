@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  FaUserPlus,
-  FaClipboardList,
-  FaBell,
-  FaCog,
-  FaUser,
-} from "react-icons/fa";
+import { FaUserPlus, FaClipboardList } from "react-icons/fa";
 import { useSocket } from "../../contexts/socketContext";
 import { LogOut } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";

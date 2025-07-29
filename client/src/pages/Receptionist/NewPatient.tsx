@@ -1,34 +1,19 @@
 import { useEffect, useState } from "react";
 import { FaSearch, FaExternalLinkAlt, FaCalendarAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import {
-  PateintDetials,
-  RegisterPatientAPI,
-  ShowDoctorsAPI,
-} from "../../utils/api";
+import { RegisterPatientAPI, ShowDoctorsAPI } from "../../utils/api";
 import { useSocket } from "../../contexts/socketContext";
 import DoctorsList from "../Admin/DoctorsList";
 import { toast } from "sonner";
 // import PatientsList from "../Admin/PatientList";
 
 const Header: React.FC = () => {
-  const [response, setResponse] = useState(null);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [isActive, setIsActive] = useState("2");
   const navigate = useNavigate();
   const handleChange = (a: string) => {
     setIsActive(a);
   };
-  useEffect(() => {
-    PateintDetials().then((res: any) => {
-      setResponse(res.data);
-    });
-  }, []);
-
-  useEffect(() => {
-    console.log(response);
-  }, [response]);
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
@@ -129,11 +114,10 @@ interface Doctor {
   last_name: string;
   departmentId: string;
   department: any;
-  roomId:any,
-  room:{
-    room_number:any
-  }
-
+  roomId: any;
+  room: {
+    room_number: any;
+  };
 }
 
 function NewPatient() {
@@ -154,7 +138,9 @@ function NewPatient() {
   const [availableDocs, setAvailableDocs] = useState<Doctor[]>([]);
   const [showError, setShowError] = useState(false);
   const [error, setErr] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
   useEffect(() => {
     if (error) {
@@ -165,9 +151,10 @@ function NewPatient() {
       return () => clearTimeout(timer); // Cleanup
     }
   }, [error]);
-  useEffect(()=>{
-    console.log(availableDocs)
-  },[availableDocs])
+
+  useEffect(() => {
+    console.log(availableDocs);
+  }, [availableDocs]);
 
   // Validation function
   const validateFields = () => {
@@ -189,7 +176,7 @@ function NewPatient() {
 
     if (!patientData.phone.trim()) {
       errors.phone = "Phone number is required";
-    } else if (!/^\d{10}$/.test(patientData.phone.replace(/\D/g, ''))) {
+    } else if (!/^\d{10}$/.test(patientData.phone.replace(/\D/g, ""))) {
       errors.phone = "Phone number must be 10 digits";
     }
 
@@ -199,7 +186,10 @@ function NewPatient() {
 
     if (!patientData.age.trim()) {
       errors.age = "Age is required";
-    } else if (parseInt(patientData.age) <= 0 || parseInt(patientData.age) > 150) {
+    } else if (
+      parseInt(patientData.age) <= 0 ||
+      parseInt(patientData.age) > 150
+    ) {
       errors.age = "Age must be between 1 and 150";
     }
 
@@ -218,14 +208,16 @@ function NewPatient() {
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
-  const selectedDoctor = availableDocs.find(doc => doc.doctor_id === patientData.doctor);
+  const selectedDoctor = availableDocs.find(
+    (doc) => doc.doctor_id === patientData.doctor
+  );
 
   // Create finalData dynamically when needed
   const getFinalData = () => {
     return {
       is_emergency: patientData.emergency,
       doctorId: patientData.doctor,
-      roomId:selectedDoctor?.roomId||null,
+      roomId: selectedDoctor?.roomId || null,
       departmentId: deptId[patientData.department as DepartmentName],
       patientDetails: {
         first_name: patientData.firstName,
@@ -247,7 +239,7 @@ function NewPatient() {
           );
           if (res.data.status === "success") {
             setAvailableDocs(res.data.AvailableDoctor);
-            console.log(availableDocs)
+            console.log(availableDocs);
           }
         } catch (error: any) {
           console.error("Error fetching doctors:", error);
@@ -269,16 +261,18 @@ function NewPatient() {
     }
 
     if (!socket) return;
-    const toastId=toast.loading('Registraion in progress')
+    const toastId = toast.loading("Registraion in progress");
 
     try {
-      socket.emit("new-patient-registered", { patientName: `${patientData.firstName} ${patientData.lastName}` });
+      socket.emit("new-patient-registered", {
+        patientName: `${patientData.firstName} ${patientData.lastName}`,
+      });
       const finalData = getFinalData();
       console.log(finalData);
       const response = await RegisterPatientAPI(finalData);
-      toast.success('Registration successful',{
-        id:toastId
-      })
+      toast.success("Registration successful", {
+        id: toastId,
+      });
       console.log("Patient registered successfully:", response.data);
       // Reset form on success
       setPatientData({
@@ -294,10 +288,10 @@ function NewPatient() {
         emergency: false,
       });
       setValidationErrors({});
-    } catch (err:any) {
-        toast.error(`Registration failed: ${err.response.data.message}`, {
-          id: toastId,
-        });
+    } catch (err: any) {
+      toast.error(`Registration failed: ${err.response.data.message}`, {
+        id: toastId,
+      });
       console.error("Error registering patient:", error);
       // Handle error (show error message to user)
     }
@@ -354,15 +348,22 @@ function NewPatient() {
                   name="firstName"
                   value={patientData.firstName}
                   onChange={(e) =>
-                    setPatientData({ ...patientData, firstName: e.target.value })
+                    setPatientData({
+                      ...patientData,
+                      firstName: e.target.value,
+                    })
                   }
                   placeholder="Enter first name"
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
-                    validationErrors.firstName ? 'border-red-500' : 'border-gray-300'
+                    validationErrors.firstName
+                      ? "border-red-500"
+                      : "border-gray-300"
                   }`}
                 />
                 {validationErrors.firstName && (
-                  <p className="text-red-500 text-xs mt-1">{validationErrors.firstName}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {validationErrors.firstName}
+                  </p>
                 )}
               </div>
 
@@ -380,11 +381,15 @@ function NewPatient() {
                   }
                   placeholder="Enter last name"
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
-                    validationErrors.lastName ? 'border-red-500' : 'border-gray-300'
+                    validationErrors.lastName
+                      ? "border-red-500"
+                      : "border-gray-300"
                   }`}
                 />
                 {validationErrors.lastName && (
-                  <p className="text-red-500 text-xs mt-1">{validationErrors.lastName}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {validationErrors.lastName}
+                  </p>
                 )}
               </div>
             </div>
@@ -403,11 +408,13 @@ function NewPatient() {
                 }
                 placeholder="Enter email"
                 className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
-                  validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                  validationErrors.email ? "border-red-500" : "border-gray-300"
                 }`}
               />
               {validationErrors.email && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {validationErrors.email}
+                </p>
               )}
             </div>
 
@@ -425,11 +432,13 @@ function NewPatient() {
                 }
                 placeholder="Enter phone number"
                 className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
-                  validationErrors.phone ? 'border-red-500' : 'border-gray-300'
+                  validationErrors.phone ? "border-red-500" : "border-gray-300"
                 }`}
               />
               {validationErrors.phone && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.phone}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {validationErrors.phone}
+                </p>
               )}
             </div>
 
@@ -443,7 +452,9 @@ function NewPatient() {
                   <label
                     key={gender}
                     className={`flex items-center space-x-2 border rounded-lg px-3 py-2 w-full max-w-[120px] cursor-pointer focus-within:ring-2 focus-within:ring-green-500 ${
-                      validationErrors.gender ? 'border-red-500' : 'border-gray-300'
+                      validationErrors.gender
+                        ? "border-red-500"
+                        : "border-gray-300"
                     }`}
                   >
                     <input
@@ -467,7 +478,9 @@ function NewPatient() {
               </div>
             </div>
             {validationErrors.gender && (
-              <p className="text-red-500 text-xs mt-1">{validationErrors.gender}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {validationErrors.gender}
+              </p>
             )}
 
             {/* Age */}
@@ -484,11 +497,13 @@ function NewPatient() {
                 }
                 placeholder="Enter age"
                 className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
-                  validationErrors.age ? 'border-red-500' : 'border-gray-300'
+                  validationErrors.age ? "border-red-500" : "border-gray-300"
                 }`}
               />
               {validationErrors.age && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.age}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {validationErrors.age}
+                </p>
               )}
             </div>
 
@@ -506,11 +521,15 @@ function NewPatient() {
                 }
                 placeholder="Enter address"
                 className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors text-sm ${
-                  validationErrors.address ? 'border-red-500' : 'border-gray-300'
+                  validationErrors.address
+                    ? "border-red-500"
+                    : "border-gray-300"
                 }`}
               />
               {validationErrors.address && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.address}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {validationErrors.address}
+                </p>
               )}
             </div>
 
@@ -530,7 +549,9 @@ function NewPatient() {
                   })
                 }
                 className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white text-sm ${
-                  validationErrors.department ? 'border-red-500' : 'border-gray-300'
+                  validationErrors.department
+                    ? "border-red-500"
+                    : "border-gray-300"
                 }`}
               >
                 <option value="">Select Department</option>
@@ -541,7 +562,9 @@ function NewPatient() {
                 ))}
               </select>
               {validationErrors.department && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.department}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {validationErrors.department}
+                </p>
               )}
             </div>
 
@@ -554,7 +577,7 @@ function NewPatient() {
                 name="doctor"
                 value={patientData.doctor}
                 onChange={(e) =>
-                  setPatientData({ ...patientData, doctor: e.target.value, })
+                  setPatientData({ ...patientData, doctor: e.target.value })
                 }
                 disabled={
                   !patientData.department ||
@@ -562,21 +585,26 @@ function NewPatient() {
                   availableDocs.length === 0
                 }
                 className={`w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors bg-white disabled:bg-gray-50 disabled:text-gray-500 text-sm ${
-                  validationErrors.doctor ? 'border-red-500' : 'border-gray-300'
+                  validationErrors.doctor ? "border-red-500" : "border-gray-300"
                 }`}
               >
                 <option value="">Select available Doctor</option>
                 {availableDocs.length > 0 &&
                   availableDocs.map((doctor) => (
                     <option key={doctor.doctor_id} value={doctor.doctor_id}>
-                      Dr.{doctor.first_name} {doctor.last_name}__{doctor.room.room_number}
+                      Dr.{doctor.first_name} {doctor.last_name}__
+                      {doctor.room.room_number}
                     </option>
                   ))}
               </select>
               {validationErrors.doctor && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.doctor}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {validationErrors.doctor}
+                </p>
               )}
-              {showError && <p className="text-red-500 text-xs mt-1">No doctor online</p>}
+              {showError && (
+                <p className="text-red-500 text-xs mt-1">No doctor online</p>
+              )}
             </div>
 
             {/* Submit Button */}
