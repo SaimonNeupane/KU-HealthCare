@@ -6,6 +6,6 @@ router.get("/patientdetails", PatientDetails);
 router.post('/requestlab',labRequest)
 router.post('/querybed/:id',bedQuery)
 router.post('/completeDiagnosis/:id',completeDiagnosis)
-router.post('/changeOnlineStatus/:id',changeOnlineStatus)
+router.post('/changeOnlineStatus/:d',changeOnlineStatus)
 
 export default router;
