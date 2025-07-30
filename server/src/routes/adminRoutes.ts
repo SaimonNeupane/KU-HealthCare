@@ -4,7 +4,7 @@ import { appointments, dashboard, doctorData, patients, receptionists } from "..
 
 const router= Router();
 
-router.get("/dodDetails",doctorData)
+router.get("/docDetails",doctorData)
 router.get("/dashboard",dashboard)
 router.get("/appointments",appointments)
 router.get("/patients",patients)

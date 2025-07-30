@@ -15,9 +15,11 @@ export const doctorData = AsyncError(
         role: "doctor",
       },
       select: {
+        
         email: true,
         doctor: {
           select: {
+            doctor_id:true,
             first_name: true,
             last_name: true,
             department: true,
@@ -60,11 +62,17 @@ export const dashboard = AsyncError(
 export const appointments= AsyncError(async(req:Request,res:Response,next:NextFunction)=>{
   const appointments= await prisma.appointment.findMany({
     select:{
+      appointment_id:true,
       patient:{
         select:{
           first_name:true,
           last_name:true,
           patient_id:true,
+        }
+      },
+      department:{
+        select:{
+            name:true
         }
       },
       doctor:{
