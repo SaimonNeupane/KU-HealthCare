@@ -3,19 +3,20 @@ import { Edit, Trash2 } from "lucide-react";
 import { adminRecepAPI } from "../../utils/api";
 import { useQuery } from "@tanstack/react-query";
 import LoadingScreen from "./LoadingComponent";
+import { useNavigate } from "react-router";
 interface Receptionist {
-  email: "aarti-sharma-30@hospital.com";
+  email: string;
   receptionist: {
-    first_name: "Aarti";
-    last_name: "Sharma";
-    phone: "9803383363";
+    first_name: string;
+    last_name: string;
+    phone: string;
   };
 }
 
 const useRecepQuery = () => {
   return useQuery({
     queryKey: ["recep"],
-    queryFn: async (): Promise<Receptionist> => {
+    queryFn: async (): Promise<Receptionist[]> => {
       const res = await adminRecepAPI();
       return res.data.receptionists;
     },
@@ -23,6 +24,7 @@ const useRecepQuery = () => {
 };
 
 const ReceptionistsList = () => {
+  const navigate = useNavigate();
   const [receptionists, setReceptionists] = useState([
     {
       id: 1,
@@ -98,6 +100,12 @@ const ReceptionistsList = () => {
         <h1 className="text-4xl font-bold text-gray-900">
           List of Receptionists
         </h1>
+        <button
+          className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          onClick={() => navigate("/signup/receptionist")}
+        >
+          + Add Receptionist
+        </button>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -120,40 +128,45 @@ const ReceptionistsList = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {data?.map((item: any, index: number) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {item.receptionist.first_name}{" "}
-                      {item.receptionist.last_name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {item.receptionist.phone}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-blue-600">{item.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        className="text-blue-600 hover:text-blue-800 p-1"
-                        title="Edit"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        className="text-red-600 hover:text-red-800 p-1"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {data?.map(
+                (
+                  item: any,
+                  index: number // error is on the data?.map fix this
+                ) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {item.receptionist.first_name}{" "}
+                        {item.receptionist.last_name}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {item.receptionist.phone}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-blue-600">{item.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          className="text-blue-600 hover:text-blue-800 p-1"
+                          title="Edit"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          className="text-red-600 hover:text-red-800 p-1"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              )}
             </tbody>
           </table>
         </div>

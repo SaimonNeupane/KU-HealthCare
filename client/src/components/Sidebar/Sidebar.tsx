@@ -62,6 +62,11 @@ const sidebarConfig: Record<
         icon: <ClipboardList className="w-4 h-4" />,
         label: "Receptionists",
       },
+      {
+        to: "/admin/labassistants",
+        icon: <Users className="w-4 h-4" />,
+        label: "Lab Assistants",
+      },
     ],
   },
   doctor: {
@@ -124,7 +129,7 @@ export default function Sidebar({ variant }: SidebarProps) {
   }
 
   return (
-    <aside className="w-full min-h-screen bg-white shadow-md p-6 flex flex-col">
+    <aside className="h-full w-full min-h-screen bg-white shadow-md p-6 flex flex-col">
       {/* Profile Section */}
       <div className="flex items-center gap-3 mb-10">
         <UserCircle2 className="w-10 h-10 text-gray-500" />
