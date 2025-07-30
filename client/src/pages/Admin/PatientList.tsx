@@ -22,7 +22,7 @@ interface Patient {
 const usePatientQuery = () => {
   return useQuery({
     queryKey: ["patients"],
-    queryFn: async (): Promise<Patient> => {
+    queryFn: async (): Promise<Patient[]> => {
       const response = await adminPatientssAPI();
       return response.data.patients;
     },
@@ -69,7 +69,7 @@ const PatientsList = () => {
 
   return (
     <div className="px-6 py-6">
-      <div className="mb-6">
+      <div className="mb-6 flex justify-between ">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">
           List of Patients
         </h1>
@@ -78,7 +78,7 @@ const PatientsList = () => {
           placeholder="Search by name, ID or phone..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="border rounded px-3 py-1 text-sm mb-4"
+          className="border-2 rounded px-3 py-2 text-sm mb-4"
         />
       </div>
 
