@@ -116,10 +116,10 @@ interface Patient {
   Appointment: any[];
 }
 
-interface DashboardData {
-  doctors: Doctor[];
-  patients: Patient[];
-}
+// interface DashboardData {
+//   doctors: Doctor[];
+//   patients: Patient[];
+// }
 
 // Custom hooks for data fetching
 const useDoctorsQuery = () => {

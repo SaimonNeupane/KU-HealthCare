@@ -1,4 +1,4 @@
-import { useState } from "react";
+// import { useState } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import { adminRecepAPI } from "../../utils/api";
 import { useQuery } from "@tanstack/react-query";
@@ -25,65 +25,65 @@ const useRecepQuery = () => {
 
 const ReceptionistsList = () => {
   const navigate = useNavigate();
-  const [receptionists, setReceptionists] = useState([
-    {
-      id: 1,
-      name: "Brooklyn Simmons",
-      phone: "(217) 555-0113",
-      email: "brooklyn@gmail.com",
-      department: "Cardiology",
-      sex: "Female",
-    },
-    {
-      id: 2,
-      name: "Kristin Watson",
-      phone: "(308) 555-0121",
-      email: "kristin@gmail.com",
-      department: "Neurology",
-      sex: "Female",
-    },
-    {
-      id: 3,
-      name: "Jacob Jones",
-      phone: "(219) 555-0114",
-      email: "jacob@gmail.com",
-      department: "Orthopedics",
-      sex: "Male",
-    },
-  ]);
+  // const [receptionists, setReceptionists] = useState([
+  //   {
+  //     id: 1,
+  //     name: "Brooklyn Simmons",
+  //     phone: "(217) 555-0113",
+  //     email: "brooklyn@gmail.com",
+  //     department: "Cardiology",
+  //     sex: "Female",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Kristin Watson",
+  //     phone: "(308) 555-0121",
+  //     email: "kristin@gmail.com",
+  //     department: "Neurology",
+  //     sex: "Female",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Jacob Jones",
+  //     phone: "(219) 555-0114",
+  //     email: "jacob@gmail.com",
+  //     department: "Orthopedics",
+  //     sex: "Male",
+  //   },
+  // ]);
 
-  interface HandleEdit {
-    (id: number): void;
-  }
+  // interface HandleEdit {
+  //   (id: number): void;
+  // }
 
-  const handleEdit: HandleEdit = (id) => {
-    console.log("Edit receptionist with id:", id);
-    // Add edit functionality here
-  };
+  // const handleEdit: HandleEdit = (id) => {
+  //   console.log("Edit receptionist with id:", id);
+  //   // Add edit functionality here
+  // };
 
-  interface Receptionist {
-    id: number;
-    name: string;
-    phone: string;
-    email: string;
-    department: string;
-    sex: string;
-  }
+  // interface Receptionist {
+  //   id: number;
+  //   name: string;
+  //   phone: string;
+  //   email: string;
+  //   department: string;
+  //   sex: string;
+  // }
 
-  const handleDelete = (id: number) => {
-    if (window.confirm("Are you sure you want to delete this receptionist?")) {
-      setReceptionists(
-        receptionists.filter(
-          (receptionist: Receptionist) => receptionist.id !== id
-        )
-      );
-    }
-  };
+  // const handleDelete = (id: number) => {
+  //   if (window.confirm("Are you sure you want to delete this receptionist?")) {
+  //     setReceptionists(
+  //       receptionists.filter(
+  //         (receptionist: Receptionist) => receptionist.id !== id
+  //       )
+  //     );
+  //   }
+  // };
 
-  const handleAddReceptionist = () => {
-    console.log("Add new receptionist");
-    // Add new receptionist functionality here
-  };
+  // const handleAddReceptionist = () => {
+  //   console.log("Add new receptionist");
+  //   // Add new receptionist functionality here
+  // };
 
   const { data, isLoading } = useRecepQuery();
   if (isLoading) {

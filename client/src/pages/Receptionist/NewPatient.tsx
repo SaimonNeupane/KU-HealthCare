@@ -3,7 +3,7 @@ import { FaSearch, FaExternalLinkAlt, FaCalendarAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { RegisterPatientAPI, ShowDoctorsAPI } from "../../utils/api";
 import { useSocket } from "../../contexts/socketContext";
-import DoctorsList from "../Admin/DoctorsList";
+// import DoctorsList from "../Admin/DoctorsList";
 import { toast } from "sonner";
 // import PatientsList from "../Admin/PatientList";
 
