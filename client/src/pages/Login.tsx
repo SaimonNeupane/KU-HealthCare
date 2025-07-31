@@ -167,7 +167,7 @@ function Login() {
               </div>
 
               {/* Remember me checkbox */}
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <input
                   id="remember-me"
                   name="remember-me"
@@ -182,7 +182,7 @@ function Login() {
                 >
                   Remember me
                 </label>
-              </div>
+              </div> */}
 
               {/* Login button */}
               <div>
@@ -195,17 +195,17 @@ function Login() {
               </div>
 
               {/* Forgot password link */}
-              <div className="text-center">
+              {/* <div className="text-center">
                 <a
                   href="#"
                   className="text-sm text-green-600 hover:text-green-500"
                 >
                   Forgot password?
                 </a>
-              </div>
+              </div> */}
 
               {/* Sign up link */}
-              <div className="text-center">
+              {/* <div className="text-center">
                 <p className="text-sm text-gray-600">
                   New user?{" "}
                   <a
@@ -215,7 +215,7 @@ function Login() {
                     Sign up
                   </a>
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </main>

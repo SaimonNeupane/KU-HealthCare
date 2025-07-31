@@ -34,7 +34,7 @@ model Department {
 model Room {
   room_id      String        @id @default(uuid())
   room_number  Int
-  status       String
+  status       String?
   created_at   DateTime      @default(now())
   departmentId String
   Appointment  Appointment[]
