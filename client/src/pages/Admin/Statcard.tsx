@@ -1,36 +1,72 @@
-import { FaUserMd, FaUserInjured, FaCalendarAlt, FaBed, FaFlask } from "react-icons/fa";
+import {
+  FaUserMd,
+  FaUserInjured,
+  FaCalendarAlt,
+  FaBed,
+  FaFlask,
+} from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+import { adminDashboardAPI } from "../../utils/api";
+import LoadingScreen from "./LoadingComponent";
+interface statType {
+  patientCount: number;
+  doctorCount: number;
+  labCount: number;
+  appointmentCount: number;
+  bedCount: number;
+}
+
+const useDashboardQuery = () => {
+  return useQuery<statType>({
+    queryKey: ["stats"],
+    queryFn: async () => {
+      const response = await adminDashboardAPI();
+      return response.data;
+    },
+    staleTime: 60 * 1000 * 3,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 3,
+  });
+};
 
 export default function StatsCards() {
+  const { data, isLoading } = useDashboardQuery();
+
   const stats = [
-    { 
-      label: "Patients", 
-      mainValue: "1,245",
+    {
+      label: "Patients",
+      mainValue: isLoading ? <LoadingScreen ram={15} /> : data?.patientCount,
       subValue: "Total",
-      icon: <FaUserInjured /> 
+      icon: <FaUserInjured />,
     },
-    { 
-      label: "Appointments", 
-      mainValue: "320",
+    {
+      label: "Appointments",
+      mainValue: isLoading ? (
+        <LoadingScreen ram={15} />
+      ) : (
+        data?.appointmentCount
+      ),
       subValue: "Upcoming",
-      icon: <FaCalendarAlt /> 
+      icon: <FaCalendarAlt />,
     },
-    { 
-      label: "Doctors", 
-      mainValue: "45",
+    {
+      label: "Doctors",
+      mainValue: isLoading ? <LoadingScreen ram={15} /> : data?.doctorCount,
       subValue: "Active",
-      icon: <FaUserMd /> 
+      icon: <FaUserMd />,
     },
-    { 
-      label: "Lab Reports", 
-      mainValue: "12",
+    {
+      label: "Lab Reports",
+      mainValue: isLoading ? <LoadingScreen ram={15} /> : data?.labCount,
       subValue: "Pending",
-      icon: <FaFlask /> 
+      icon: <FaFlask />,
     },
-    { 
-      label: "Beds", 
-      mainValue: "23/45",
+    {
+      label: "Beds",
+      mainValue: isLoading ? <LoadingScreen ram={15} /> : data?.bedCount,
       subValue: "",
-      icon: <FaBed /> 
+      icon: <FaBed />,
     },
   ];
 
@@ -47,8 +83,12 @@ export default function StatsCards() {
             </div>
             <div>
               <p className="text-sm text-gray-500">{stat.label}</p>
-              <p className="text-2xl font-bold text-gray-800">{stat.mainValue}</p>
-              {stat.subValue && <p className="text-xs text-gray-400">{stat.subValue}</p>}
+              <p className="text-2xl font-bold text-gray-800">
+                {stat.mainValue}
+              </p>
+              {stat.subValue && (
+                <p className="text-xs text-gray-400">{stat.subValue}</p>
+              )}
             </div>
           </div>
         </div>

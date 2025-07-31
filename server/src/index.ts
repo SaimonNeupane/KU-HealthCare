@@ -5,6 +5,7 @@ import LoginRoutes from "./routes/loginRoute";
 import RecepRoutes from "./routes/Receptionists/receptionistRoutes";
 import assistantRoutes from "./routes/labAssistantRoute";
 import doctorRoutes from "./routes/doctorRoute";
+import adminRoutes from './routes/adminRoutes'
 
 import bodyParser, { json } from "body-parser";
 import morgan from "morgan";
@@ -33,6 +34,7 @@ app.use(`/receptionist`, RecepRoutes);
 app.use(`/user`, LoginRoutes);
 app.use("/lab", assistantRoutes);
 app.use("/doctor", doctorRoutes);
+app.use("/admin",adminRoutes)
 
 app.use((req: Request, res: Response, next: NextFunction): any => {
   return res.status(400).json({

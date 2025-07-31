@@ -1,55 +1,60 @@
 import { Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { adminDocDetialsAPI } from "../../utils/api";
+import { useQuery } from "@tanstack/react-query";
+import LoadingScreen from "./LoadingComponent";
+
+interface Department {
+  department_id: string;
+  name: string;
+  description: string;
+  created_at: string;
+}
+
+interface DoctorData {
+  doctor_id: string;
+  first_name: string;
+  last_name: string;
+  department: Department;
+  departmentId: string;
+  specialization: string;
+  phone: string;
+}
+
+interface Doctor {
+  email: string;
+  doctor: DoctorData;
+}
+
+const useDoctorQuery = () => {
+  return useQuery<Doctor[]>({
+    queryKey: ["doctor"],
+    queryFn: async (): Promise<Doctor[]> => {
+      const response = await adminDocDetialsAPI();
+      console.log(response.data.doctors);
+      return response.data.doctors;
+    },
+  });
+};
 
 export default function DoctorsList() {
   const navigate = useNavigate();
-  const doctors = [
-    {
-      id: 1,
-      name: "Dr. Brooklyn Simmons",
-      phone: "872345623",
-      email: "brooklyn@gmail.com",
-      department: "Cardiology",
-      specialization: "Heart Specialist",
-      sex: "Female",
-    },
-    {
-      id: 2,
-      name: "Dr. Kristin Watson",
-      phone: "908246123",
-      email: "kristinw@gmail.com",
-      department: "Neurology",
-      specialization: "Brain Specialist",
-      sex: "Female",
-    },
-    {
-      id: 3,
-      name: "Dr. Jacob Jones",
-      phone: "234876543",
-      email: "jacob@gmail.com",
-      department: "Orthopedics",
-      specialization: "Bone Specialist",
-      sex: "Male",
-    },
-    {
-      id: 4,
-      name: "Dr. Cody Fisher",
-      phone: "234856432",
-      email: "cody@gmail.com",
-      department: "Pediatrics",
-      specialization: "Child Specialist",
-      sex: "Male",
-    },
-    {
-      id: 5,
-      name: "Dr. Esther Howard",
-      phone: "678456432",
-      email: "esther@gmail.com",
-      department: "Dermatology",
-      specialization: "Skin Specialist",
-      sex: "Female",
-    },
-  ];
+  const { data, isLoading, isError } = useDoctorQuery();
+
+  if (isLoading) {
+    return (
+      <div className="h-full w-full flex justify-center items-center">
+        <LoadingScreen ram={60} />
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return <p>Error loading doctors.</p>;
+  }
+
+  // `data` is an array of Doctor objects
+  const doctors = data;
 
   return (
     <div className="w-full bg-gray-50 min-h-screen p-6">
@@ -85,39 +90,33 @@ export default function DoctorsList() {
                 Specialization
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Sex
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {doctors.map((doctor) => (
-              <tr key={doctor.id} className="hover:bg-gray-50">
+            {doctors.map(({ email, doctor }) => (
+              <tr key={doctor.doctor_id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
-                    {doctor.name}
+                    {doctor.first_name} {doctor.last_name}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{doctor.phone}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{doctor.email}</div>
+                  <div className="text-sm text-gray-900">{email}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {doctor.department}
+                    {doctor.department.name}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     {doctor.specialization}
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{doctor.sex}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex gap-2">

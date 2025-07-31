@@ -86,26 +86,41 @@ const Header: React.FC = () => {
 };
 
 type DepartmentName =
-  | "cardiology"
-  | "neurology"
-  | "orthopedics"
+  | "oncology"
+  | "gastroenterology"
+  | "emergency-medicine"
   | "pediatrics"
-  | "general";
+  | "dermatology"
+  | "general-medicine"
+  | "neurology"
+  | "psychiatry"
+  | "orthopedics"
+  | "cardiology";
 
 const departments: DepartmentName[] = [
-  "cardiology",
-  "neurology",
-  "orthopedics",
+  "oncology",
+  "gastroenterology",
+  "emergency-medicine",
   "pediatrics",
-  "general",
+  "dermatology",
+  "general-medicine",
+  "neurology",
+  "psychiatry",
+  "orthopedics",
+  "cardiology",
 ];
 
 const deptId: Record<DepartmentName, string> = {
-  cardiology: "4eaf8cc0-07ca-4f5d-9997-2b3037877539",
-  neurology: "6d120962-c5eb-4526-b2cb-b3d14e7b8aac",
-  orthopedics: "764b1ef6-e4d7-4a67-a9a3-ad125141cd7b",
-  pediatrics: "fd3814bd-ffda-43cb-acd2-df7dc98b9810",
-  general: "f677a4a3-03f9-4a11-8e1a-4ac8acbb4548",
+  oncology: "2f5f36b8-92d9-410c-ba4b-a8dd334755fe",
+  gastroenterology: "47b6d72f-c7ff-4709-b587-4d5949c709dc",
+  "emergency-medicine": "577a10c7-78a7-458a-b35f-1ad71cd37927",
+  pediatrics: "6d432e89-06fd-4184-a1e0-e3021ba0ba9b",
+  dermatology: "75ad83bf-c2bc-4425-bfc3-a17ec9dc1f33",
+  "general-medicine": "7759a8fa-42a5-429a-8411-69b6b468aa70",
+  neurology: "976f9896-f8b3-4a8e-8d2f-5c44b4cf9f40",
+  psychiatry: "aa5b0204-dfb9-4d3e-8cc3-2f1a8e16eeb5",
+  orthopedics: "cd69dfd6-5894-4aca-be6e-f0f58d5f3c25",
+  cardiology: "e1adf3b5-9499-46fb-8681-a76ebd0deda4",
 };
 
 interface Doctor {

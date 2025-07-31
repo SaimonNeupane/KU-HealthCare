@@ -48,3 +48,10 @@ export const RecepPatientAPI = () => baseURL.get("/receptionist/patient");
 export const RecepDoctorAPI = () => baseURL.get("/receptionist/dashboard");
 
 export const DoctorPatientAPI = () => baseURL.get("/doctor/patientdetails");
+
+export const adminDashboardAPI=():any=>baseURL.get("/admin/dashboard")
+export const adminDocDetialsAPI=():any=>baseURL.get("/admin/docDetails")
+export const adminAppointmentsAPI=():any=>baseURL.get("/admin/appointments")
+export const adminPatientssAPI=():any=>baseURL.get("/admin/patients")
+export const adminRecepAPI=():any=>baseURL.get("/admin/receptionists")
+
