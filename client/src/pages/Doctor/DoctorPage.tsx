@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import MyPatients from "./MyPatients";
 import Notification from "./Notification";
+import Diagnosis from "./Diagnosis";
 
 export default function DoctorPage() {
   return (
@@ -14,6 +15,7 @@ export default function DoctorPage() {
         <Routes>
           <Route index element={<MyPatients />} />
           <Route path="mypatients" element={<MyPatients />} />
+          <Route path="patient/:id" element={<Diagnosis />} />
           <Route path="notification" element={<Notification />} />
         </Routes>
       </main>

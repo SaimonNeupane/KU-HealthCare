@@ -71,7 +71,7 @@ interface PatientDetailsProps {
   initialPatientId?: string;
 }
 
-const PatientDetails: React.FC<PatientDetailsProps> = ({
+const Diagnosis: React.FC<PatientDetailsProps> = ({
   patients = samplePatients,
   initialPatientId,
 }) => {
@@ -271,4 +271,4 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({
   );
 };
 
-export default PatientDetails;
+export default Diagnosis;

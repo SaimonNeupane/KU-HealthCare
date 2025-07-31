@@ -3,6 +3,7 @@ import { FaUserPlus, FaClipboardList } from "react-icons/fa";
 import { useSocket } from "../../contexts/socketContext";
 import { LogOut } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router";
 
 interface NotificationItemProps {
   icon: React.ReactNode;
@@ -44,20 +45,26 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 };
 
 const Notification: React.FC = () => {
+  const navigate = useNavigate();
   const socket = useSocket();
   const [name, setName] = useState();
-  const handleView = (notification: string) => {
-    console.log(`Viewing ${notification}`);
+  const [patientId, setPatientId] = useState(); // Add state for patient ID
+
+  const handleView = (userId: string) => {
+    // Remove "doctor/" prefix since you're already inside the doctor routes
+    navigate(`patient/${userId}`);
   };
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("lab-report-arrived", async ({ patientName }) => {
+    socket.on("lab-report-arrived", async ({ patientName, patientId }) => {
       setName(patientName);
-      console.log(patientName);
+      setPatientId(patientId); // Store the actual patient ID from backend
+      console.log(patientName, patientId);
     });
   }, [socket]);
+
   const { logout } = useAuth();
 
   return (
@@ -78,7 +85,7 @@ const Notification: React.FC = () => {
                 title={`New patient appointed: ${name}`}
                 subtitle="Auto-assigned Patient ID: 12345"
                 timeAgo="2 mins ago"
-                onView={() => handleView("John Doe appointment")}
+                onView={() => handleView(patientId || "12345")} // Use actual patient ID
               />
             ) : (
               <div />
@@ -88,7 +95,7 @@ const Notification: React.FC = () => {
               icon={<FaClipboardList className="w-6 h-6" />}
               title="Lab report Arrived: Parikchit Sen"
               timeAgo="20 mins ago"
-              onView={() => handleView("Parikchit Sen lab report")}
+              onView={() => handleView("userid")} // Replace with actual patient ID when available
             />
           </div>
         </div>
