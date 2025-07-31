@@ -1,7 +1,30 @@
 import { useState } from "react";
 import { Edit, Trash2 } from "lucide-react";
+import { adminRecepAPI } from "../../utils/api";
+import { useQuery } from "@tanstack/react-query";
+import LoadingScreen from "./LoadingComponent";
+import { useNavigate } from "react-router";
+interface Receptionist {
+  email: string;
+  receptionist: {
+    first_name: string;
+    last_name: string;
+    phone: string;
+  };
+}
+
+const useRecepQuery = () => {
+  return useQuery({
+    queryKey: ["recep"],
+    queryFn: async (): Promise<Receptionist[]> => {
+      const res = await adminRecepAPI();
+      return res.data.receptionists;
+    },
+  });
+};
 
 const ReceptionistsList = () => {
+  const navigate = useNavigate();
   const [receptionists, setReceptionists] = useState([
     {
       id: 1,
@@ -62,90 +85,75 @@ const ReceptionistsList = () => {
     // Add new receptionist functionality here
   };
 
+  const { data, isLoading } = useRecepQuery();
+  if (isLoading) {
+    return (
+      <div className="h-full w-full flex justify-center items-center">
+        <LoadingScreen ram={60} />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
-      {/* Title and Add Button */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-4xl font-bold text-gray-900">
           List of Receptionists
         </h1>
         <button
-          onClick={handleAddReceptionist}
-          className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          onClick={() => navigate("/signup/receptionist")}
         >
-          Add Receptionist...
+          + Add Receptionist
         </button>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Phone
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Department
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sex
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {receptionists.map((receptionist) => (
-                <tr
-                  key={receptionist.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
+              {data?.map((item: any, index: number) => (
+                <tr key={index} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {receptionist.name}
+                      {item.receptionist.first_name}{" "}
+                      {item.receptionist.last_name}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {receptionist.phone}
+                      {item.receptionist.phone}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
-                      {receptionist.email}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {receptionist.department}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {receptionist.sex}
-                    </div>
+                    <div className="text-sm text-blue-600">{item.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => handleEdit(receptionist.id)}
-                        className="text-blue-600 hover:text-blue-800 p-1 rounded transition-colors"
+                        className="text-blue-600 hover:text-blue-800 p-1"
                         title="Edit"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(receptionist.id)}
-                        className="text-red-600 hover:text-red-800 p-1 rounded transition-colors"
+                        className="text-red-600 hover:text-red-800 p-1"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
