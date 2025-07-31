@@ -2,15 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { Request, Response, NextFunction } from "express";
 import AsyncError from "../../Errors/asyncError";
 import HttpError from "../../Errors/httpError";
-import { waitForDebugger } from "inspector";
 
 const prisma = new PrismaClient();
-
-interface LabRequestBody {
-  appointment_id: string;
-  patientId: string;
-  doctorId: string;
-}
 
 export const PatientDetails: any = async (req: Request, res: Response) => {
   const details = await prisma.patient.findMany({
@@ -47,7 +40,7 @@ export const PatientDetails: any = async (req: Request, res: Response) => {
 
 export const labRequest = AsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    const Appointment: LabRequestBody = req.body;
+    const Appointment: any = req.body;
     if (
       !Appointment.appointment_id ||
       !Appointment.patientId ||
@@ -237,3 +230,35 @@ export const changeOnlineStatus = AsyncError(
 export const patientInQueue = AsyncError(
   async (req: Request, res: Response, next: NextFunction) => {}
 );
+
+export const OnePatientForDiagnosis: any = async (
+  req: Request,
+  res: Response
+) => {
+  const patId = req.params.id;
+  const details = await prisma.appointment.findFirst({
+    where: {
+      patientId: patId,
+    },
+    select: {
+      patient: {
+        select: {
+          first_name: true,
+          last_name: true,
+          age: true,
+          gender: true,
+          patient_id: true,
+          contact_number: true,
+          address: true,
+          bed: {
+            select: {
+              bed_id: true,
+            },
+          },
+        },
+      },
+      status: true,
+    },
+  });
+  return res.status(200).json(details);
+};

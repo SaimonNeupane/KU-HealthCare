@@ -4,6 +4,7 @@ import { FaExclamationTriangle } from "react-icons/fa";
 import { useAuth } from "../../contexts/AuthContext";
 import { DoctorPatientAPI } from "../../utils/api";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 interface PatientData {
   patient_id: string;
@@ -35,6 +36,7 @@ interface PatientRowProps {
   patientId?: string;
   age?: number;
   admissionDate?: string;
+  onClick?: () => void;
 }
 
 const PatientRow: React.FC<PatientRowProps> = ({
@@ -47,9 +49,13 @@ const PatientRow: React.FC<PatientRowProps> = ({
   patientId,
   age,
   admissionDate,
+  onClick,
 }) => {
   return (
-    <div className="border-b border-gray-100 py-6">
+    <div
+      className="border-b border-gray-100 py-6 cursor-pointer hover:bg-gray-50 transition-colors"
+      onClick={onClick}
+    >
       <div className="grid grid-cols-4 gap-8 items-center">
         {/* Patient Name */}
         <div className="flex items-center space-x-2">
@@ -188,8 +194,13 @@ const transformPatientData = (patient: PatientData): PatientRowProps => {
 
 const MyPatients: React.FC = () => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const currentDateTime = "2025-07-28 08:20:07";
   const currentUser = "Prabesh-Sharma";
+
+  const handlePatientClick = (patientId: string) => {
+    navigate(`../patient/${patientId}`);
+  };
 
   const {
     data: patients,
@@ -281,6 +292,9 @@ const MyPatients: React.FC = () => {
                     patientId={patient.patientId}
                     age={patient.age}
                     admissionDate={patient.admissionDate}
+                    onClick={() =>
+                      patient.patientId && handlePatientClick(patient.patientId)
+                    }
                   />
                 ))
               ) : (

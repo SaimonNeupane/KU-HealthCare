@@ -52,7 +52,7 @@ const Notification: React.FC = () => {
 
   const handleView = (userId: string) => {
     // Remove "doctor/" prefix since you're already inside the doctor routes
-    navigate(`patient/${userId}`);
+    navigate(`../patient/${userId}`);
   };
 
   useEffect(() => {

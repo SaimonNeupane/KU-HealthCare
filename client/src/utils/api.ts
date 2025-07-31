@@ -49,9 +49,35 @@ export const RecepDoctorAPI = () => baseURL.get("/receptionist/dashboard");
 
 export const DoctorPatientAPI = () => baseURL.get("/doctor/patientdetails");
 
-export const adminDashboardAPI=():any=>baseURL.get("/admin/dashboard")
-export const adminDocDetialsAPI=():any=>baseURL.get("/admin/docDetails")
-export const adminAppointmentsAPI=():any=>baseURL.get("/admin/appointments")
-export const adminPatientssAPI=():any=>baseURL.get("/admin/patients")
-export const adminRecepAPI=():any=>baseURL.get("/admin/receptionists")
+export const adminDashboardAPI = (): any => baseURL.get("/admin/dashboard");
+export const adminDocDetialsAPI = (): any => baseURL.get("/admin/docDetails");
+export const adminAppointmentsAPI = (): any =>
+  baseURL.get("/admin/appointments");
+export const adminPatientssAPI = (): any => baseURL.get("/admin/patients");
+export const adminRecepAPI = (): any => baseURL.get("/admin/receptionists");
 
+export const doctorDiagnosisOnePatientAPI = ({ id }: { id: String }) => {
+  return baseURL.get(`/doctor/onePatientForDiagnosis/${id}`);
+};
+
+export const completeDiagnosisAPI = ({ patientId }: { patientId: string }) => {
+  return baseURL.post(`/doctor/completediagnosis/${patientId}`);
+};
+export const bedManagementAPI = ({ patientId }: { patientId: string }) => {
+  return baseURL.post(`/doctor/bedquery/${patientId}`);
+};
+export const requestLabReportAPI = ({
+  patientId,
+  appointment_id,
+  doctorId,
+}: {
+  patientId: string;
+  appointment_id: string;
+  doctorId: string;
+}) => {
+  return baseURL.post("/doctor/labrequest", {
+    appointment_id,
+    patientId,
+    doctorId,
+  });
+};
