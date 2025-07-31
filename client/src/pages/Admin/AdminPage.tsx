@@ -5,6 +5,7 @@ import DoctorsList from "./DoctorsList";
 import PatientsList from "./PatientList";
 import Appointments from "./Appointment";
 import Receptionists from "./Receptionist";
+import LabAssistantList from "./LabAssistantList";
 
 export default function AdminPage() {
   return (
@@ -21,6 +22,7 @@ export default function AdminPage() {
           <Route path="patients" element={<PatientsList />} />
           <Route path="appointments" element={<Appointments />} />
           <Route path="receptionists" element={<Receptionists />} />
+          <Route path="labassistants" element={<LabAssistantList />} />
         </Routes>
       </main>
     </div>

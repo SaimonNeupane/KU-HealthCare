@@ -34,7 +34,7 @@ model Department {
 model Room {
   room_id      String        @id @default(uuid())
   room_number  Int
-  status       String
+  status       String?
   created_at   DateTime      @default(now())
   departmentId String
   Appointment  Appointment[]
@@ -58,24 +58,27 @@ model Receptionist {
   last_name       String   @db.VarChar(20)
   created_at      DateTime @default(now())
   userId          String   @unique
+  phone           String?
   user            User     @relation(fields: [userId], references: [user_id])
 }
 
 model Doctor {
-  doctor_id      String     @id @default(uuid())
-  first_name     String     @db.VarChar(20)
-  last_name      String     @db.VarChar(20)
-  specialization String     @db.VarChar(20)
+  doctor_id      String        @id @default(uuid())
+  first_name     String        @db.VarChar(20)
+  last_name      String        @db.VarChar(20)
+  specialization String        @db.VarChar(20)
   is_online      Boolean
   departmentId   String
-  created_at     DateTime   @default(now())
-  userId         String     @unique
+  created_at     DateTime      @default(now())
+  userId         String        @unique
   roomId         String
-  workingFrom    String     @db.VarChar(5)
-  workingTo      String     @db.VarChar(5)
-  department     Department @relation(fields: [departmentId], references: [department_id])
-  room           Room       @relation(fields: [roomId], references: [room_id])
-  user           User       @relation(fields: [userId], references: [user_id])
+  workingFrom    String        @db.VarChar(5)
+  workingTo      String        @db.VarChar(5)
+  phone          String?
+  appointment    Appointment[]
+  department     Department    @relation(fields: [departmentId], references: [department_id])
+  room           Room          @relation(fields: [roomId], references: [room_id])
+  user           User          @relation(fields: [userId], references: [user_id])
   LabTest        LabTest[]
 }
 
@@ -116,7 +119,7 @@ model Patient {
 model Appointment {
   appointment_id   String      @id @default(uuid())
   patientId        String
-  doctorId         String
+  doctorId         String?
   roomId           String
   appointment_time DateTime    @default(now())
   status           String      @db.VarChar
@@ -124,6 +127,7 @@ model Appointment {
   created_at       DateTime    @default(now())
   departmentId     String?
   department       Department? @relation(fields: [departmentId], references: [department_id])
+  doctor           Doctor?     @relation(fields: [doctorId], references: [doctor_id])
   patient          Patient     @relation(fields: [patientId], references: [patient_id])
   room             Room        @relation(fields: [roomId], references: [room_id])
   LabTest          LabTest[]

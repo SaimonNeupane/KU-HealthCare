@@ -18,6 +18,7 @@ const initializeSocket = (httpServer: HttpServer) => {
     const user_id = socket.handshake.auth.user_id;
 
     if (role === "doctor" && user_id) {
+      socket.emit("doctor-online", { user_id });
       await prisma.doctor.updateMany({
         where: { userId: user_id },
         data: { is_online: true },
