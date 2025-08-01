@@ -60,28 +60,49 @@ export const PatientDetails: any = async (
 };
 
 export const labRequest = AsyncError(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const Appointment: any = req.body;
-    if (
-      !Appointment.appointment_id ||
-      !Appointment.patientId ||
-      !Appointment.doctorId
-    ) {
-      return next(new HttpError(400, "Missing required fields"));
+  async (req: customRequest, res: Response, next: NextFunction) => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return next(new HttpError(401, "Unauthorized"));
+    }
+
+    const doctor = await prisma.doctor.findFirst({
+      where: { userId },
+    });
+
+    if (!doctor) {
+      return next(new HttpError(404, "Doctor not found"));
+    }
+
+    const { appointment_id, patientId } = req.body;
+
+    // Validate that appointment exists
+    const appointment = await prisma.appointment.findUnique({
+      where: { appointment_id },
+    });
+
+    if (!appointment) {
+      return next(new HttpError(404, "Appointment not found"));
+    }
+
+    // Validate that patient exists
+    const patient = await prisma.patient.findUnique({
+      where: { patient_id: patientId },
+    });
+
+    if (!patient) {
+      return next(new HttpError(404, "Patient not found"));
     }
 
     const labReq = await prisma.labTest.create({
       data: {
-        appointmentId: Appointment.appointment_id,
-        patientId: Appointment.patientId,
-        requesting_doctor_id: Appointment.doctorId,
+        appointmentId: appointment_id,
+        patientId,
+        requesting_doctor_id: doctor.doctor_id, // ✅ Use doctor_id instead of userId
         status: "Pending",
       },
     });
-
-    if (!labReq) {
-      return next(new HttpError(400, `Lab test creation Failed`));
-    }
 
     return res.status(200).json({
       status: "success",
@@ -90,6 +111,7 @@ export const labRequest = AsyncError(
     });
   }
 );
+
 export const bedQuery = AsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const patient = await prisma.patient.findFirst({
@@ -262,6 +284,7 @@ export const OnePatientForDiagnosis: any = async (
       patientId: patId,
     },
     select: {
+      appointment_id: true,
       patient: {
         select: {
           first_name: true,

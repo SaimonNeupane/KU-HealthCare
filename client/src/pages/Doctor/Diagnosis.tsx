@@ -6,10 +6,14 @@ import {
   CheckCircle,
   Bed,
   UserCheck,
+  Loader2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { doctorDiagnosisOnePatientAPI } from "../../utils/api";
+import { toast } from "sonner";
+import { requestLabReportAPI } from "../../utils/api";
+import { bedQueryAPI } from "../../utils/api";
 
 // TypeScript interfaces
 interface Bed {
@@ -50,20 +54,10 @@ interface Patient {
   bed?: Bed | null;
 }
 
-interface DiagnosisResponse {
-  appointment_id: string;
-  status: string;
-  diagnosis?: string;
-  prescription?: string;
-  notes?: string;
-  completed_at?: string;
-  patient: Patient;
-}
-
 const usePatientQuery = (id: any) => {
   return useQuery({
     queryKey: ["patient", id],
-    queryFn: async (): Promise<DiagnosisResponse> => {
+    queryFn: async (): Promise<any> => {
       const response = await doctorDiagnosisOnePatientAPI({ id });
       return response?.data;
     },
@@ -78,12 +72,14 @@ const usePatientQuery = (id: any) => {
 
 const Diagnosis: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const [bedLoading, setBedLoading] = useState(false);
 
   const {
     data: diagnosisData,
     isLoading,
     isError,
     error,
+    refetch, // Add refetch to update data after bed management
   } = usePatientQuery(id || "");
 
   const formatDate = (dateString: string): string => {
@@ -95,13 +91,60 @@ const Diagnosis: React.FC = () => {
     });
   };
 
-  // Handlers with only console.log
-  const handleLabReportRequest = () => {
-    console.log("requested");
+  const requestLabReport = async ({
+    patientId,
+    appointment_id,
+  }: {
+    patientId: string;
+    appointment_id: string;
+  }) => {
+    const toastId = toast.loading("Requesting lab report...");
+    try {
+      await requestLabReportAPI({ patientId, appointment_id });
+
+      toast.success("Lab report requested successfully", {
+        id: toastId,
+      });
+    } catch (error) {
+      toast.error("Failed to request lab report", {
+        id: toastId,
+      });
+      console.error("Error requesting lab report:", error);
+    }
   };
 
-  const handleBedManagement = () => {
-    console.log("requested");
+  const handleBedManagement = async ({ id }: { id: string }) => {
+    setBedLoading(true);
+    const toastId = toast.loading("Processing bed request...");
+
+    try {
+      const response = await bedQueryAPI(id);
+
+      // Check the response to determine success message
+      if (response.data.status === "success") {
+        toast.success("Bed released successfully", { id: toastId });
+      } else if (response.data.status === "Success") {
+        toast.success("Bed assigned successfully", { id: toastId });
+      } else {
+        toast.success("Bed managed successfully", { id: toastId });
+      }
+
+      // Refetch patient data to get updated bed status
+      await refetch();
+    } catch (error: any) {
+      console.error("Error requesting bed:", error);
+
+      // Handle specific error cases
+      if (error?.response?.status === 404) {
+        toast.error("All beds are currently reserved", { id: toastId });
+      } else if (error?.response?.data?.message) {
+        toast.error(error.response.data.message, { id: toastId });
+      } else {
+        toast.error("Failed to manage bed", { id: toastId });
+      }
+    } finally {
+      setBedLoading(false);
+    }
   };
 
   const handleCompleteDiagnosis = () => {
@@ -164,6 +207,7 @@ const Diagnosis: React.FC = () => {
 
   const { patient, status: appointmentStatus } = diagnosisData;
   const isCompleted = appointmentStatus === "completed";
+  const hasBed = !!patient.bedId;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -224,7 +268,12 @@ const Diagnosis: React.FC = () => {
             </div>
 
             <button
-              onClick={handleLabReportRequest}
+              onClick={() =>
+                requestLabReport({
+                  patientId: patient.patient_id,
+                  appointment_id: diagnosisData.appointment_id,
+                })
+              }
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md px-3 py-2"
             >
               <FileText className="w-4 h-4" />
@@ -249,11 +298,18 @@ const Diagnosis: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Bed Status</p>
-              <p className="text-gray-900 font-medium">
-                {patient.bedId
-                  ? `Bed ${patient.bed?.room_number || patient.bedId}`
-                  : "Not Assigned"}
-              </p>
+              <div className="flex items-center space-x-2">
+                <p className="text-gray-900 font-medium">
+                  {hasBed
+                    ? `Bed ${patient.bed?.room_number || patient.bedId}`
+                    : "Not Assigned"}
+                </p>
+                {hasBed && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Assigned
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -275,11 +331,17 @@ const Diagnosis: React.FC = () => {
           {/* Action Buttons */}
           <div className="space-y-3">
             <button
-              onClick={handleBedManagement}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+              onClick={() => handleBedManagement({ id: patient.patient_id })}
+              disabled={bedLoading}
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
-              <Bed className="w-4 h-4" />
-              <span>{patient.bedId ? "Free Bed" : "Assign Bed"}</span>
+              <span>
+                {bedLoading
+                  ? "Processing..."
+                  : hasBed
+                  ? "Manage Bed"
+                  : "Manage Bed"}
+              </span>
             </button>
 
             {!isCompleted && (

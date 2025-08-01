@@ -73,18 +73,15 @@ export const bedManagementAPI = ({ patientId }: { patientId: string }) => {
 export const requestLabReportAPI = ({
   patientId,
   appointment_id,
-  doctorId,
 }: {
   patientId: string;
   appointment_id: string;
-  doctorId: string;
 }) => {
   return baseURL.post(
-    "/doctor/labrequest",
+    "/doctor/requestlab",
     {
       appointment_id,
       patientId,
-      doctorId,
     },
     {
       headers: getAuthHeaders(),
@@ -161,32 +158,12 @@ export const adminRecepAPI = (): any => {
   });
 };
 
-// ============ ALTERNATIVE: AXIOS INTERCEPTOR APPROACH ============
-// Instead of manually adding headers to each function, you can set up an interceptor:
-
-// Add request interceptor to automatically include auth token
-baseURL.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+export const bedQueryAPI = (patientId: string) => {
+  return baseURL.post(
+    `/doctor/querybed/${patientId}`,
+    {},
+    {
+      headers: getAuthHeaders(),
     }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor to handle 401 errors globally
-baseURL.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem("token");
-      window.location.href = "/login"; // Redirect to login
-    }
-    return Promise.reject(error);
-  }
-);
+  );
+};

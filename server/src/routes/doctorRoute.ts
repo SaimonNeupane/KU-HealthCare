@@ -17,7 +17,7 @@ router.get(
   authorization(["doctor"]),
   PatientDetails
 );
-router.post("/requestlab", labRequest);
+router.post("/requestlab", AuthenticateToken, labRequest);
 router.post("/querybed/:id", bedQuery);
 router.post("/completeDiagnosis/:id", completeDiagnosis);
 router.post("/changeOnlineStatus/:d", changeOnlineStatus);
