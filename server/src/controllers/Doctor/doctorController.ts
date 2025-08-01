@@ -102,8 +102,8 @@ export const labRequest = AsyncError(
       data: {
         appointmentId: appointment_id,
         patientId,
-        requesting_doctor_id: doctor.doctor_id, // ✅ Use doctor_id instead of userId
-        status: "Pending",
+        requesting_doctor_id: doctor.doctor_id,
+        status: "pending",
       },
     });
 
@@ -174,76 +174,45 @@ export const bedQuery = AsyncError(
     });
   }
 );
-
 export const completeDiagnosis = AsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    let updatedLabReport = null;
-    let updatedBed = null;
+    const patientId = req.params.id;
 
-    const patient = await prisma.patient.findFirst({
-      where: {
-        patient_id: req.params.id,
-      },
-    });
-    let updatedPatient = patient;
-    const labReport = await prisma.labTest.findFirst({
-      where: {
-        patientId: req.params.id,
-      },
-    });
-    if (!!labReport) {
-      updatedLabReport = await prisma.labTest.update({
-        where: {
-          test_id: labReport?.test_id,
-        },
-        data: {
-          status: "Arrived",
-        },
-      });
-    }
     const appointment = await prisma.appointment.findFirst({
       where: {
-        patientId: req.params.id,
+        patientId: patientId,
+        status: {
+          not: "completed",
+        },
+      },
+      orderBy: {
+        appointment_time: "desc",
       },
     });
-    let updatedAppointment = appointment;
-    if (!!appointment) {
-      updatedAppointment = await prisma.appointment.update({
-        where: {
-          appointment_id: appointment?.appointment_id,
-        },
-        data: {
-          status: "Completed",
-        },
+
+    if (!appointment) {
+      return res.status(404).json({
+        status: "error",
+        message: "No active appointment found for this patient",
       });
     }
-    const isAvailable: any = patient?.bedId;
-    if (!!isAvailable) {
-      updatedBed = await prisma.bed.update({
-        where: { bed_id: isAvailable },
-        data: {
-          status: "available",
-        },
-      });
-      updatedPatient = await prisma.patient.update({
-        where: {
-          patient_id: req.params.id,
-        },
-        data: {
-          bedId: null,
-        },
-      });
-    }
+
+    const updatedAppointment = await prisma.appointment.update({
+      where: {
+        appointment_id: appointment.appointment_id,
+      },
+      data: {
+        status: "completed",
+      },
+    });
+
     return res.status(200).json({
       status: "success",
-      message: "Successfully diagnosed the patient",
-      updatedBed,
-      updatedLabReport,
-      updatedPatient,
+      message: "Successfully completed diagnosis",
+      data: updatedAppointment,
     });
   }
 );
-
 export const changeOnlineStatus = AsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const doctor = await prisma.doctor.findFirst({
@@ -303,6 +272,7 @@ export const OnePatientForDiagnosis: any = async (
               bed_number: true,
             },
           },
+          LabTest: true,
         },
       },
       status: true,

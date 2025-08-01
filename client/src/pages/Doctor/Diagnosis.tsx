@@ -280,10 +280,38 @@ const Diagnosis: React.FC = () => {
                   appointment_id: diagnosisData.appointment_id,
                 })
               }
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md px-3 py-2"
+              disabled={patient.LabTest && patient.LabTest.length > 0} // Only disable if array has items
+              className={`flex items-center space-x-2 border rounded-md px-3 py-2 ${
+                patient.LabTest && patient.LabTest.length > 0
+                  ? "text-gray-400 border-gray-200 cursor-not-allowed bg-gray-50"
+                  : "text-gray-600 hover:text-gray-800 border-gray-300"
+              }`}
             >
               <FileText className="w-4 h-4" />
-              <span className="text-sm font-medium">Request Lab Report</span>
+              <span className="text-sm font-medium">
+                {patient.LabTest && patient.LabTest.length > 0 ? (
+                  // Only show status if lab test exists
+                  <>
+                    {(patient.LabTest[0]?.status === "pending" ||
+                      patient.LabTest[0].status === "Pending") &&
+                      "Lab Report Requested"}
+                    {patient.LabTest[0]?.status === "completed" &&
+                      "Lab Report Available"}
+                    {patient.LabTest[0]?.status === "processing" &&
+                      "Lab Report In Progress"}
+                    {/* Fallback if status doesn't match expected values */}
+                    {![
+                      "pending",
+                      "Pending",
+                      "completed",
+                      "processing",
+                    ].includes(patient.LabTest[0]?.status) &&
+                      "Lab Report Status Unknown"}
+                  </>
+                ) : (
+                  "Request Lab Report"
+                )}
+              </span>
             </button>
           </div>
 
@@ -345,7 +373,9 @@ const Diagnosis: React.FC = () => {
 
             {!isCompleted && (
               <button
-                onClick={handleCompleteDiagnosis}
+                onClick={() =>
+                  handleCompleteDiagnosis({ id: patient.patient_id })
+                }
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
               >
                 <UserCheck className="w-4 h-4" />
