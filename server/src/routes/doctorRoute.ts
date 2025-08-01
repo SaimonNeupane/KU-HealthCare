@@ -7,9 +7,16 @@ import {
   completeDiagnosis,
   labRequest,
 } from "../controllers/Doctor/doctorController";
+import authorization from "../middleware/authorization";
+import AuthenticateToken from "../middleware/authenticateToken";
 
 const router: Router = Router();
-router.get("/patientdetails", PatientDetails);
+router.get(
+  "/patientdetails",
+  AuthenticateToken,
+  authorization(["doctor"]),
+  PatientDetails
+);
 router.post("/requestlab", labRequest);
 router.post("/querybed/:id", bedQuery);
 router.post("/completeDiagnosis/:id", completeDiagnosis);

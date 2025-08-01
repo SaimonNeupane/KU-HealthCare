@@ -2,11 +2,32 @@ import { PrismaClient } from "@prisma/client";
 import { Request, Response, NextFunction } from "express";
 import AsyncError from "../../Errors/asyncError";
 import HttpError from "../../Errors/httpError";
+import { customRequest } from "../../middleware/authenticateToken";
 
 const prisma = new PrismaClient();
 
-export const PatientDetails: any = async (req: Request, res: Response) => {
+export const PatientDetails: any = async (
+  req: customRequest,
+  res: Response
+) => {
+  const userId = req.user?.userId; // This is the logged-in user's ID
+  const userRole = req.user?.role; // This is the logged-in user's role
+
+  console.log("Logged-in User ID:", userId);
+  const user = await prisma.doctor.findFirst({
+    where: {
+      userId: userId,
+    },
+  });
+
   const details = await prisma.patient.findMany({
+    where: {
+      Appointment: {
+        some: {
+          doctorId: user?.doctor_id,
+        },
+      },
+    },
     select: {
       LabTest: {
         select: {

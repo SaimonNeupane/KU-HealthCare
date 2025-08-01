@@ -195,8 +195,8 @@ const transformPatientData = (patient: PatientData): PatientRowProps => {
 const MyPatients: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const currentDateTime = "2025-07-28 08:20:07";
-  const currentUser = "Prabesh-Sharma";
+  const currentDateTime = "--";
+  const currentUser = "--";
 
   const handlePatientClick = (patientId: string) => {
     navigate(`../patient/${patientId}`);
