@@ -52,7 +52,12 @@ const Notification: React.FC = () => {
   >([]);
 
   const handleView = (userId: string) => {
+<<<<<<< HEAD
     navigate(`patient/${userId}`);
+=======
+    // Remove "doctor/" prefix since you're already inside the doctor routes
+    navigate(`../patient/${userId}`);
+>>>>>>> 301b9009e8535721888dbc2e14a12f1eb5a13275
   };
 
   const { user_id } = useAuth();

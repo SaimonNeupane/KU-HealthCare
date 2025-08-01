@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import MyPatients from "./MyPatients";
 import Notification from "./Notification";
@@ -13,7 +13,7 @@ export default function DoctorPage() {
 
       <main className="flex-1 p-6">
         <Routes>
-          <Route index element={<MyPatients />} />
+          <Route index element={<Navigate to="/doctor/mypatients" replace />} />
           <Route path="mypatients" element={<MyPatients />} />
           <Route path="patient/:id" element={<Diagnosis />} />
           <Route path="notification" element={<Notification />} />

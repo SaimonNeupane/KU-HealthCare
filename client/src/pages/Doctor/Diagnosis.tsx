@@ -1,7 +1,22 @@
 import React, { useState } from "react";
-import { Search, Bell, FileText } from "lucide-react";
+import {
+  Search,
+  Bell,
+  FileText,
+  CheckCircle,
+  Bed,
+  UserCheck,
+  Loader2,
+} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { doctorDiagnosisOnePatientAPI } from "../../utils/api";
+import { toast } from "sonner";
+import { requestLabReportAPI } from "../../utils/api";
+import { bedQueryAPI } from "../../utils/api";
+import { completeDiagnosisAPI } from "../../utils/api";
 
-// TypeScript interfaces based on Prisma model
+// TypeScript interfaces
 interface Bed {
   bed_id: string;
   room_number: string;
@@ -10,13 +25,19 @@ interface Bed {
 interface Appointment {
   appointment_id: string;
   date: string;
-  // Add other appointment fields as needed
+  appointment_time: string;
+  status: string;
+  diagnosis?: string;
+  prescription?: string;
+  notes?: string;
+  completed_at?: string;
 }
 
 interface LabTest {
   test_id: string;
   test_name: string;
-  // Add other lab test fields as needed
+  status: string;
+  requested_at?: string;
 }
 
 interface Patient {
@@ -27,62 +48,41 @@ interface Patient {
   gender: string;
   contact_number: string;
   address: string;
-  bedId: string | null;
-  created_at: string;
-  Appointment: Appointment[];
-  LabTest: LabTest[];
-  bed: Bed | null;
+  bedId?: string | null;
+  created_at?: string;
+  Appointment?: Appointment[];
+  LabTest?: LabTest[];
+  bed?: Bed | null;
 }
 
-// Sample patient data based on the Prisma model
-const samplePatients: Patient[] = [
-  {
-    patient_id: "456-123-7890",
-    first_name: "Jane",
-    last_name: "Doe",
-    age: 40,
-    gender: "Female",
-    contact_number: "9841234567",
-    address: "123 Main St, Kathmandu, Nepal",
-    bedId: null,
-    created_at: "2022-12-30T00:00:00Z",
-    Appointment: [],
-    LabTest: [],
-    bed: null,
-  },
-  {
-    patient_id: "789-456-1230",
-    first_name: "John",
-    last_name: "Smith",
-    age: 35,
-    gender: "Male",
-    contact_number: "9851234567",
-    address: "456 Oak Ave, Pokhara, Nepal",
-    bedId: "bed-001",
-    created_at: "2023-01-15T00:00:00Z",
-    Appointment: [],
-    LabTest: [],
-    bed: { bed_id: "bed-001", room_number: "101" },
-  },
-];
-
-interface PatientDetailsProps {
-  patients?: Patient[];
-  initialPatientId?: string;
-}
-
-const Diagnosis: React.FC<PatientDetailsProps> = ({
-  patients = samplePatients,
-  initialPatientId,
-}) => {
-  const [selectedPatient, setSelectedPatient] = useState<Patient>(() => {
-    if (initialPatientId) {
-      return (
-        patients.find((p) => p.patient_id === initialPatientId) || patients[0]
-      );
-    }
-    return patients[0];
+const usePatientQuery = (id: any) => {
+  return useQuery({
+    queryKey: ["patient", id],
+    queryFn: async (): Promise<any> => {
+      const response = await doctorDiagnosisOnePatientAPI({ id });
+      console.log("Patient Data:", response.data);
+      return response?.data;
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+};
+
+const Diagnosis: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [bedLoading, setBedLoading] = useState(false);
+
+  const {
+    data: diagnosisData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = usePatientQuery(id || "");
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -93,40 +93,130 @@ const Diagnosis: React.FC<PatientDetailsProps> = ({
     });
   };
 
-  const handlePatientChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ): void => {
-    const patientId = event.target.value;
-    const patient = patients.find((p) => p.patient_id === patientId);
-    if (patient) {
-      setSelectedPatient(patient);
+  const requestLabReport = async ({
+    patientId,
+    appointment_id,
+  }: {
+    patientId: string;
+    appointment_id: string;
+  }) => {
+    const toastId = toast.loading("Requesting lab report...");
+    try {
+      await requestLabReportAPI({ patientId, appointment_id });
+
+      toast.success("Lab report requested successfully", {
+        id: toastId,
+      });
+      refetch();
+    } catch (error) {
+      toast.error("Failed to request lab report", {
+        id: toastId,
+      });
+      console.error("Error requesting lab report:", error);
     }
   };
 
-  const handleLabReportRequest = (): void => {
-    // Handle lab report request logic
-    console.log(
-      `Requesting lab report for patient: ${selectedPatient.patient_id}`
-    );
+  const handleBedManagement = async ({ id }: { id: string }) => {
+    setBedLoading(true);
+
+    try {
+      const response: any = bedQueryAPI(id);
+
+      toast.promise(response, {
+        loading: patient.bed
+          ? `Clearing Bed no.${patient.bed.bed_number}`
+          : "Assigning bed",
+        success: patient.bed
+          ? `Successfuly freed bed no.${patient.bed.bed_number}`
+          : `Successfully assigned bed`,
+        error: "Failed to manage bed",
+      });
+      // Refetch patient data to get updated bed status
+      await response;
+      await refetch();
+    } catch (error: any) {
+      console.error("Error requesting bed:", error);
+      toast.error(error.message || "something went wrong");
+    } finally {
+      setBedLoading(false);
+    }
   };
 
-  const handleBedEnrollment = (): void => {
-    // Handle bed enrollment logic
-    console.log(
-      `Requesting bed enrollment for patient: ${selectedPatient.patient_id}`
-    );
+  const handleCompleteDiagnosis = ({ id }: { id: any }) => {
+    try {
+      const response: any = completeDiagnosisAPI(id);
+      toast.promise(response, {
+        loading: "completing Diagnosis",
+        success: `Successfully Diagnosed patient Id:${patient.patient_id}`,
+        error: `Failed to Diagnose patient`,
+      });
+    } catch (error: any) {
+      console.error("Error completing diagnosis:", error);
+      toast.error(error.message || "something went wrong");
+    }
   };
 
-  const handleCompleteDiagnosis = (): void => {
-    // Handle complete diagnosis logic
-    console.log(
-      `Completing diagnosis for patient: ${selectedPatient.patient_id}`
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Loading Patient Details...
+          </h2>
+          <p className="text-gray-600">
+            Please wait while we fetch the patient information.
+          </p>
+        </div>
+      </div>
     );
-  };
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Error Loading Patient
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {error instanceof Error
+              ? error.message
+              : "Failed to load patient details"}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!diagnosisData || !diagnosisData.patient) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Patient Not Found
+          </h2>
+          <p className="text-gray-600">
+            The patient with ID "{id}" could not be found.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { patient, status: appointmentStatus } = diagnosisData;
+  console.log(patient);
+  const isCompleted = appointmentStatus === "completed";
+  const hasBed = !!patient.bed?.bed_id;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -159,111 +249,146 @@ const Diagnosis: React.FC<PatientDetailsProps> = ({
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 py-8">
-        {/* Page Title and Patient Selector */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Patient details</h1>
-          <select
-            value={selectedPatient.patient_id}
-            onChange={handlePatientChange}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {patients.map((patient: Patient) => (
-              <option key={patient.patient_id} value={patient.patient_id}>
-                {patient.first_name} {patient.last_name}
-              </option>
-            ))}
-          </select>
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Patient Details
+            </h1>
+            {isCompleted && (
+              <div className="flex items-center space-x-2 text-green-600">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-medium">Diagnosis Completed</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Patient Info Card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-start justify-between mb-6">
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                {selectedPatient.first_name} {selectedPatient.last_name}
+                {patient.first_name} {patient.last_name}
               </h2>
-              <p className="text-sm text-gray-500">
-                ID: {selectedPatient.patient_id}
-              </p>
+              <p className="text-sm text-gray-500">ID: {patient.patient_id}</p>
             </div>
 
             <button
-              onClick={handleLabReportRequest}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md px-3 py-2"
+              onClick={() =>
+                requestLabReport({
+                  patientId: patient.patient_id,
+                  appointment_id: diagnosisData.appointment_id,
+                })
+              }
+              disabled={patient.LabTest && patient.LabTest.length > 0} // Only disable if array has items
+              className={`flex items-center space-x-2 border rounded-md px-3 py-2 ${
+                patient.LabTest && patient.LabTest.length > 0
+                  ? "text-gray-400 border-gray-200 cursor-not-allowed bg-gray-50"
+                  : "text-gray-600 hover:text-gray-800 border-gray-300"
+              }`}
             >
               <FileText className="w-4 h-4" />
-              <span className="text-sm font-medium">request lab report</span>
+              <span className="text-sm font-medium">
+                {patient.LabTest && patient.LabTest.length > 0 ? (
+                  // Only show status if lab test exists
+                  <>
+                    {(patient.LabTest[0]?.status === "pending" ||
+                      patient.LabTest[0].status === "Pending") &&
+                      "Lab Report Requested"}
+                    {patient.LabTest[0]?.status === "completed" &&
+                      "Lab Report Available"}
+                    {patient.LabTest[0]?.status === "processing" &&
+                      "Lab Report In Progress"}
+                    {/* Fallback if status doesn't match expected values */}
+                    {![
+                      "pending",
+                      "Pending",
+                      "completed",
+                      "processing",
+                    ].includes(patient.LabTest[0]?.status) &&
+                      "Lab Report Status Unknown"}
+                  </>
+                ) : (
+                  "Request Lab Report"
+                )}
+              </span>
             </button>
           </div>
 
-          {/* Patient Details Grid */}
           <div className="grid grid-cols-2 gap-8 mb-6">
             <div>
               <p className="text-sm text-gray-500 mb-1">Age</p>
-              <p className="text-gray-900 font-medium">{selectedPatient.age}</p>
+              <p className="text-gray-900 font-medium">{patient.age}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Gender</p>
-              <p className="text-gray-900 font-medium">
-                {selectedPatient.gender}
-              </p>
+              <p className="text-gray-900 font-medium">{patient.gender}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Contact Number</p>
               <p className="text-gray-900 font-medium">
-                {selectedPatient.contact_number}
+                {patient.contact_number}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Bed Status</p>
-              <p className="text-gray-900 font-medium">
-                {selectedPatient.bedId
-                  ? `Bed ${
-                      selectedPatient.bed?.room_number || selectedPatient.bedId
-                    }`
-                  : "Not Assigned"}
-              </p>
+              <div className="flex items-center space-x-2">
+                <p className="text-gray-900 font-medium">
+                  {hasBed
+                    ? `Bed no.${patient.bed?.bed_number}`
+                    : "Not Assigned"}
+                </p>
+                {hasBed && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Assigned
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 mb-8">
             <div>
               <p className="text-sm text-gray-500 mb-1">Address</p>
-              <p className="text-gray-900 font-medium">
-                {selectedPatient.address}
-              </p>
+              <p className="text-gray-900 font-medium">{patient.address}</p>
             </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Admission date</p>
-              <p className="text-gray-900 font-medium">
-                {formatDate(selectedPatient.created_at)}
-              </p>
-            </div>
+            {patient.created_at && (
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Admission Date</p>
+                <p className="text-gray-900 font-medium">
+                  {formatDate(patient.created_at)}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
           <div className="space-y-3">
             <button
-              onClick={handleBedEnrollment}
-              className={`w-full font-medium py-3 px-4 rounded-lg transition-colors ${
-                selectedPatient.bedId
-                  ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
-              }`}
-              disabled={!!selectedPatient.bedId}
+              onClick={() => handleBedManagement({ id: patient.patient_id })}
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
-              {selectedPatient.bedId
-                ? "Bed Already Assigned"
-                : "Request Bed Enrollment"}
+              <span>{patient.bed ? "Clear Bed" : "Assign Bed"}</span>
             </button>
-            <button
-              onClick={handleCompleteDiagnosis}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-            >
-              Complete Diagnosis
-            </button>
+
+            {!isCompleted && (
+              <button
+                onClick={() =>
+                  handleCompleteDiagnosis({ id: patient.patient_id })
+                }
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>Complete Diagnosis</span>
+              </button>
+            )}
+
+            {isCompleted && (
+              <div className="w-full bg-gray-100 text-gray-500 font-medium py-3 px-4 rounded-lg text-center flex items-center justify-center space-x-2">
+                <CheckCircle className="w-4 h-4" />
+                <span>Diagnosis Already Completed</span>
+              </div>
+            )}
           </div>
         </div>
       </main>

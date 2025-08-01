@@ -24,36 +24,146 @@ const baseURL = axios.create({
   baseURL: apiUrl,
 });
 
-export const PateintDetials = () => baseURL.get("/receptionist/patient");
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const LoginAPI = (data: loginDataType) =>
   baseURL.post("/user/login", data);
+
 export const GetUserInfo = () => {
-  const token = localStorage.getItem("token");
   return baseURL.get("/user/getinfo", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
   });
 };
-export const RegisterPatientAPI = (patientDetails: patientDataType) =>
-  baseURL.post("/receptionist/register", patientDetails);
 
-export const ShowDoctorsAPI = (dep_id: string) =>
-  baseURL.get(`/receptionist/availableDocs/${dep_id}`);
+export const DoctorPatientAPI = () => {
+  return baseURL.get("/doctor/patientdetails", {
+    headers: getAuthHeaders(),
+  });
+};
 
-export const LabAssistantAPI = () => baseURL.get("/lab/labreport");
+export const doctorDiagnosisOnePatientAPI = ({ id }: { id: String }) => {
+  return baseURL.get(`/doctor/onePatientForDiagnosis/${id}`, {
+    headers: getAuthHeaders(),
+  });
+};
 
-export const RecepPatientAPI = () => baseURL.get("/receptionist/patient");
+export const completeDiagnosisAPI = (patientId: string) => {
+  return baseURL.post(
+    `/doctor/completediagnosis/${patientId}`,
+    {},
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+};
 
-export const RecepDoctorAPI = () => baseURL.get("/receptionist/dashboard");
+export const bedManagementAPI = ({ patientId }: { patientId: string }) => {
+  return baseURL.post(
+    `/doctor/bedquery/${patientId}`,
+    {},
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+};
 
-export const DoctorPatientAPI = () => baseURL.get("/doctor/patientdetails");
+export const requestLabReportAPI = ({
+  patientId,
+  appointment_id,
+}: {
+  patientId: string;
+  appointment_id: string;
+}) => {
+  return baseURL.post(
+    "/doctor/requestlab",
+    {
+      appointment_id,
+      patientId,
+    },
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+};
 
-export const adminDashboardAPI = (): any => baseURL.get("/admin/dashboard");
-export const adminDocDetialsAPI = (): any => baseURL.get("/admin/docDetails");
-export const adminAppointmentsAPI = (): any =>
-  baseURL.get("/admin/appointments");
-export const adminPatientssAPI = (): any => baseURL.get("/admin/patients");
-export const adminRecepAPI = (): any => baseURL.get("/admin/receptionists");
-export const labStatusAPI = (id: string): any =>
-  baseURL.patch(`/lab/labreport/status/${id}`);
+// ✅ FIXED: Added Authorization headers to receptionist APIs
+export const PateintDetials = () => {
+  return baseURL.get("/receptionist/patient", {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const RegisterPatientAPI = (patientDetails: patientDataType) => {
+  return baseURL.post("/receptionist/register", patientDetails, {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const ShowDoctorsAPI = (dep_id: string) => {
+  return baseURL.get(`/receptionist/availableDocs/${dep_id}`, {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const RecepPatientAPI = () => {
+  return baseURL.get("/receptionist/patient", {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const RecepDoctorAPI = () => {
+  return baseURL.get("/receptionist/dashboard", {
+    headers: getAuthHeaders(),
+  });
+};
+
+// ✅ FIXED: Added Authorization headers to lab APIs
+export const LabAssistantAPI = () => {
+  return baseURL.get("/lab/labreport", {
+    headers: getAuthHeaders(),
+  });
+};
+
+// ✅ FIXED: Added Authorization headers to admin APIs
+export const adminDashboardAPI = (): any => {
+  return baseURL.get("/admin/dashboard", {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const adminDocDetialsAPI = (): any => {
+  return baseURL.get("/admin/docDetails", {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const adminAppointmentsAPI = (): any => {
+  return baseURL.get("/admin/appointments", {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const adminPatientssAPI = (): any => {
+  return baseURL.get("/admin/patients", {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const adminRecepAPI = (): any => {
+  return baseURL.get("/admin/receptionists", {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const bedQueryAPI = (patientId: string) => {
+  return baseURL.post(
+    `/doctor/querybed/${patientId}`,
+    {},
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+};
