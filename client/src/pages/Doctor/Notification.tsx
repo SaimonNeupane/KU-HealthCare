@@ -47,22 +47,46 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 const Notification: React.FC = () => {
   const navigate = useNavigate();
   const socket = useSocket();
-  const [name, setName] = useState();
-  const [patientId, setPatientId] = useState(); // Add state for patient ID
+  const [notifications, setNotifications] = useState<
+    Array<{ patientName: string; patientId: string }>
+  >([]);
 
   const handleView = (userId: string) => {
-    // Remove "doctor/" prefix since you're already inside the doctor routes
     navigate(`patient/${userId}`);
   };
+
+  const { user_id } = useAuth();
+
+  useEffect(() => {
+    if (!socket || !user_id) return;
+
+    socket.emit("join-room", {
+      roomId: user_id,
+      role: "doctor",
+    });
+
+    console.log(`Doctor joining room: ${user_id}`);
+  }, [socket, user_id]);
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("lab-report-arrived", async ({ patientName, patientId }) => {
-      setName(patientName);
-      setPatientId(patientId); // Store the actual patient ID from backend
+    const handleLabReportArrived = ({
+      patientName,
+      patientId,
+    }: {
+      patientName: string;
+      patientId: string;
+    }) => {
+      setNotifications((prev) => [...prev, { patientName, patientId }]);
       console.log(patientName, patientId);
-    });
+    };
+
+    socket.on("emit-lab-report-arrived", handleLabReportArrived);
+
+    return () => {
+      socket.off("emit-lab-report-arrived", handleLabReportArrived);
+    };
   }, [socket]);
 
   const { logout } = useAuth();
@@ -79,17 +103,16 @@ const Notification: React.FC = () => {
             <LogOut onClick={logout} />
           </div>
           <div className="space-y-3">
-            {!!name ? (
+            {notifications.map((notification, index) => (
               <NotificationItem
+                key={index}
                 icon={<FaUserPlus className="w-6 h-6" />}
-                title={`New patient appointed: ${name}`}
+                title={`New patient appointed: ${notification.patientName}`}
                 subtitle="Auto-assigned Patient ID: 12345"
                 timeAgo="2 mins ago"
-                onView={() => handleView(patientId || "12345")} // Use actual patient ID
+                onView={() => handleView(notification.patientId)}
               />
-            ) : (
-              <div />
-            )}
+            ))}
 
             <NotificationItem
               icon={<FaClipboardList className="w-6 h-6" />}

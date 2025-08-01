@@ -281,6 +281,7 @@ function NewPatient() {
     try {
       socket.emit("new-patient-registered", {
         patientName: `${patientData.firstName} ${patientData.lastName}`,
+        email: `${patientData.email}`,
       });
       const finalData = getFinalData();
       console.log(finalData);

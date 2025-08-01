@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import { FaSearch, FaCheck, FaClock } from "react-icons/fa";
 import { useSocket } from "../../contexts/socketContext";
 import { useAuth } from "../../contexts/AuthContext";
-import { LabAssistantAPI } from "../../utils/api";
+import { LabAssistantAPI, labStatusAPI } from "../../utils/api";
 import { LogOut } from "lucide-react";
 
 interface LabReport {
   patient: string;
   id: string;
+  req_doc_id: string;
   status: "completed" | "processing";
+  test_id: string;
 }
 
 interface LabReportRowProps extends LabReport {
@@ -51,7 +53,7 @@ const LabReports: React.FC = () => {
     "all" | "completed" | "processing"
   >("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const { username, role } = useAuth();
+  const { username, role, user_id } = useAuth();
   const socket = useSocket();
   const [reports, setReports] = useState<LabReport[]>([]);
   const { logout } = useAuth();
@@ -60,9 +62,12 @@ const LabReports: React.FC = () => {
     async function fetchReportStatus() {
       try {
         const res = await LabAssistantAPI();
+        console.log(res);
         const mapped: LabReport[] = res.data.map((item: any) => ({
           patient: `${item.patient.first_name} ${item.patient.last_name}`,
           id: item.patientId,
+          req_doc_id: item.requesting_doctor_id,
+          test_id: item.test_id,
           status: item.status === "pending" ? "processing" : item.status,
         }));
         setReports(mapped);
@@ -73,12 +78,19 @@ const LabReports: React.FC = () => {
     fetchReportStatus();
   }, []);
 
-  const handleChangeStatus = (id: string) => {
+  const handleChangeStatus = async (id: string, test_id: string) => {
     setReports((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status: "completed" } : r))
     );
+    await labStatusAPI(test_id);
     const patientName = reports.find((r) => r.id === id)?.patient;
-    socket?.emit("send-lab-report", { patientName });
+    const recipient_id = reports.find((r) => r.id === id)?.req_doc_id;
+    socket?.emit("send-lab-report", {
+      patientName,
+      id,
+      sender_id: user_id,
+      recipient_id,
+    });
   };
 
   const filteredReports = reports.filter((report) => {
@@ -194,11 +206,15 @@ const LabReports: React.FC = () => {
             <div className="px-6">
               {filteredReports.map((report) => (
                 <LabReportRow
-                  key={report.id}
+                  key={report.test_id}
+                  req_doc_id={report.req_doc_id}
                   patient={report.patient}
                   id={report.id}
                   status={report.status}
-                  onChangeStatus={() => handleChangeStatus(report.id)}
+                  test_id={report.test_id}
+                  onChangeStatus={() =>
+                    handleChangeStatus(report.id, report.test_id)
+                  }
                 />
               ))}
               {filteredReports.length === 0 && (
