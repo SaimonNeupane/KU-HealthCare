@@ -50,7 +50,7 @@ export const doctorDiagnosisOnePatientAPI = ({ id }: { id: String }) => {
   });
 };
 
-export const completeDiagnosisAPI = ({ patientId }: { patientId: string }) => {
+export const completeDiagnosisAPI = (patientId: string) => {
   return baseURL.post(
     `/doctor/completediagnosis/${patientId}`,
     {},

@@ -14,6 +14,7 @@ import { doctorDiagnosisOnePatientAPI } from "../../utils/api";
 import { toast } from "sonner";
 import { requestLabReportAPI } from "../../utils/api";
 import { bedQueryAPI } from "../../utils/api";
+import { completeDiagnosisAPI } from "../../utils/api";
 
 // TypeScript interfaces
 interface Bed {
@@ -59,6 +60,7 @@ const usePatientQuery = (id: any) => {
     queryKey: ["patient", id],
     queryFn: async (): Promise<any> => {
       const response = await doctorDiagnosisOnePatientAPI({ id });
+      console.log("Patient Data:", response.data);
       return response?.data;
     },
     enabled: !!id,
@@ -79,7 +81,7 @@ const Diagnosis: React.FC = () => {
     isLoading,
     isError,
     error,
-    refetch, // Add refetch to update data after bed management
+    refetch,
   } = usePatientQuery(id || "");
 
   const formatDate = (dateString: string): string => {
@@ -105,6 +107,7 @@ const Diagnosis: React.FC = () => {
       toast.success("Lab report requested successfully", {
         id: toastId,
       });
+      refetch();
     } catch (error) {
       toast.error("Failed to request lab report", {
         id: toastId,
@@ -115,40 +118,42 @@ const Diagnosis: React.FC = () => {
 
   const handleBedManagement = async ({ id }: { id: string }) => {
     setBedLoading(true);
-    const toastId = toast.loading("Processing bed request...");
 
     try {
-      const response = await bedQueryAPI(id);
+      const response: any = bedQueryAPI(id);
 
-      // Check the response to determine success message
-      if (response.data.status === "success") {
-        toast.success("Bed released successfully", { id: toastId });
-      } else if (response.data.status === "Success") {
-        toast.success("Bed assigned successfully", { id: toastId });
-      } else {
-        toast.success("Bed managed successfully", { id: toastId });
-      }
-
+      toast.promise(response, {
+        loading: patient.bed
+          ? `Clearing Bed no.${patient.bed.bed_number}`
+          : "Assigning bed",
+        success: patient.bed
+          ? `Successfuly freed bed no.${patient.bed.bed_number}`
+          : `Successfully assigned bed`,
+        error: "Failed to manage bed",
+      });
       // Refetch patient data to get updated bed status
+      await response;
       await refetch();
     } catch (error: any) {
       console.error("Error requesting bed:", error);
-
-      // Handle specific error cases
-      if (error?.response?.status === 404) {
-        toast.error("All beds are currently reserved", { id: toastId });
-      } else if (error?.response?.data?.message) {
-        toast.error(error.response.data.message, { id: toastId });
-      } else {
-        toast.error("Failed to manage bed", { id: toastId });
-      }
+      toast.error(error.message || "something went wrong");
     } finally {
       setBedLoading(false);
     }
   };
 
-  const handleCompleteDiagnosis = () => {
-    console.log("requested");
+  const handleCompleteDiagnosis = ({ id }: { id: any }) => {
+    try {
+      const response: any = completeDiagnosisAPI(id);
+      toast.promise(response, {
+        loading: "completing Diagnosis",
+        success: `Successfully Diagnosed patient Id:${patient.patient_id}`,
+        error: `Failed to Diagnose patient`,
+      });
+    } catch (error: any) {
+      console.error("Error completing diagnosis:", error);
+      toast.error(error.message || "something went wrong");
+    }
   };
 
   if (isLoading) {
@@ -206,8 +211,9 @@ const Diagnosis: React.FC = () => {
   }
 
   const { patient, status: appointmentStatus } = diagnosisData;
+  console.log(patient);
   const isCompleted = appointmentStatus === "completed";
-  const hasBed = !!patient.bedId;
+  const hasBed = !!patient.bed?.bed_id;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -301,7 +307,7 @@ const Diagnosis: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <p className="text-gray-900 font-medium">
                   {hasBed
-                    ? `Bed ${patient.bed?.room_number || patient.bedId}`
+                    ? `Bed no.${patient.bed?.bed_number}`
                     : "Not Assigned"}
                 </p>
                 {hasBed && (
@@ -332,16 +338,9 @@ const Diagnosis: React.FC = () => {
           <div className="space-y-3">
             <button
               onClick={() => handleBedManagement({ id: patient.patient_id })}
-              disabled={bedLoading}
               className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
-              <span>
-                {bedLoading
-                  ? "Processing..."
-                  : hasBed
-                  ? "Manage Bed"
-                  : "Manage Bed"}
-              </span>
+              <span>{patient.bed ? "Clear Bed" : "Assign Bed"}</span>
             </button>
 
             {!isCompleted && (

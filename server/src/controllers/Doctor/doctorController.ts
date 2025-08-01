@@ -28,6 +28,9 @@ export const PatientDetails: any = async (
         },
       },
     },
+    orderBy: {
+      created_at: "desc",
+    },
     select: {
       LabTest: {
         select: {
@@ -297,6 +300,7 @@ export const OnePatientForDiagnosis: any = async (
           bed: {
             select: {
               bed_id: true,
+              bed_number: true,
             },
           },
         },
