@@ -29,6 +29,7 @@ const getAuthHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+// AUTH API
 export const LoginAPI = (data: loginDataType) =>
   baseURL.post("/user/login", data);
 
@@ -38,6 +39,7 @@ export const GetUserInfo = () => {
   });
 };
 
+// DOCTOR APIs
 export const DoctorPatientAPI = () => {
   return baseURL.get("/doctor/patientdetails", {
     headers: getAuthHeaders(),
@@ -89,7 +91,17 @@ export const requestLabReportAPI = ({
   );
 };
 
-// ✅ FIXED: Added Authorization headers to receptionist APIs
+export const bedQueryAPI = (patientId: string) => {
+  return baseURL.post(
+    `/doctor/querybed/${patientId}`,
+    {},
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+};
+
+// RECEPTIONIST APIs
 export const PateintDetials = () => {
   return baseURL.get("/receptionist/patient", {
     headers: getAuthHeaders(),
@@ -120,50 +132,80 @@ export const RecepDoctorAPI = () => {
   });
 };
 
-// ✅ FIXED: Added Authorization headers to lab APIs
+// LAB ASSISTANT APIs
 export const LabAssistantAPI = () => {
   return baseURL.get("/lab/labreport", {
     headers: getAuthHeaders(),
   });
 };
 
-// ✅ FIXED: Added Authorization headers to admin APIs
-export const adminDashboardAPI = (): any => {
-  return baseURL.get("/admin/dashboard", {
-    headers: getAuthHeaders(),
+export const labStatusAPI = (id: string) =>
+  baseURL.patch(`/lab/labreport/status/${id}`);
+
+export const adminDashboardAPI = () => {
+  return baseURL.get("/admin/dashboard");
+};
+
+export const adminDocDetialsAPI = () => {
+  return baseURL.get("/admin/docDetails");
+};
+
+export const labAssistantsAPI = () => {
+  return baseURL.get("/admin/labassistant").then((response) => {
+    return response;
   });
 };
 
-export const adminDocDetialsAPI = (): any => {
-  return baseURL.get("/admin/docDetails", {
-    headers: getAuthHeaders(),
-  });
+export const adminAppointmentsAPI = () => {
+  return baseURL.get("/admin/appointments");
 };
 
-export const adminAppointmentsAPI = (): any => {
-  return baseURL.get("/admin/appointments", {
-    headers: getAuthHeaders(),
-  });
+export const adminPatientssAPI = () => {
+  return baseURL.get("/admin/patients");
 };
 
-export const adminPatientssAPI = (): any => {
-  return baseURL.get("/admin/patients", {
-    headers: getAuthHeaders(),
-  });
+export const adminRecepAPI = () => {
+  return baseURL.get("/admin/receptionists");
 };
 
-export const adminRecepAPI = (): any => {
-  return baseURL.get("/admin/receptionists", {
-    headers: getAuthHeaders(),
-  });
+export const addDocAPI = (data: any) =>
+  baseURL.post("/admin/create/doctor", data);
+
+export const addRecepAPI = (data: any) =>
+  baseURL.post("/admin/create/recep", data);
+
+export const addLabAssAPI = (data: any) =>
+  baseURL.post("/admin/create/lab", data);
+
+// ADMIN UPDATE APIs (NO AUTH HEADERS)
+export const updateDocAPI = (id: string, data: any) =>
+  baseURL.patch(`/admin/update/doctor/${id}`, data);
+
+export const updateRecepAPI = (id: string, data: any) =>
+  baseURL.patch(`/admin/update/recep/${id}`, data);
+
+export const updateLabAssAPI = (id: string, data: any) =>
+  baseURL.patch(`/admin/update/lab/${id}`, data);
+
+export const deleteRecepAPI = (id: string) =>
+  baseURL.delete(`/admin/delete/recep/${id}`);
+
+export const deleteLabAssAPI = (id: string) =>
+  baseURL.delete(`/admin/delete/lab/${id}`);
+
+export const deleteNotifAPI = (id: string) =>
+  baseURL.delete(`/notifications/${id}`);
+
+export const getNotifAPI = (id: string) => baseURL.get(`/notifications/${id}`);
+
+export const getNotificationsAPI = (userId: string) => {
+  return baseURL.get(`/notifications/${userId}`);
 };
 
-export const bedQueryAPI = (patientId: string) => {
-  return baseURL.post(
-    `/doctor/querybed/${patientId}`,
-    {},
-    {
-      headers: getAuthHeaders(),
-    }
-  );
+export const deleteNotificationAPI = (notificationId: string) => {
+  return baseURL.delete(`/notifications/${notificationId}`);
 };
+
+// Aliases for signup component
+export const addLabAssistantAPI = addLabAssAPI;
+export const addReceptionistAPI = addRecepAPI;

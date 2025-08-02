@@ -1,16 +1,29 @@
 import { useState } from "react";
 import { Edit, Trash2 } from "lucide-react";
-import { adminRecepAPI } from "../../utils/api";
-import { useQuery } from "@tanstack/react-query";
+import { adminRecepAPI, updateRecepAPI, deleteRecepAPI } from "../../utils/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import LoadingScreen from "./LoadingComponent";
 import { useNavigate } from "react-router";
+
+interface ReceptionistData {
+  receptionist_id?: string; // Make it optional since it might not be in response
+  first_name: string;
+  last_name: string;
+  phone: string;
+}
+
 interface Receptionist {
   email: string;
-  receptionist: {
-    first_name: string;
-    last_name: string;
-    phone: string;
-  };
+  receptionist: ReceptionistData;
+}
+
+interface UpdateReceptionistForm {
+  first_name: string;
+  last_name: string;
+  phone: string;
+  username: string;
+  email: string;
+  password?: string;
 }
 
 const useRecepQuery = () => {
@@ -18,6 +31,7 @@ const useRecepQuery = () => {
     queryKey: ["recep"],
     queryFn: async (): Promise<Receptionist[]> => {
       const res = await adminRecepAPI();
+      console.log("API Response:", res.data); // Debug log
       return res.data.receptionists;
     },
   });
@@ -25,73 +39,183 @@ const useRecepQuery = () => {
 
 const ReceptionistsList = () => {
   const navigate = useNavigate();
-  const [receptionists, setReceptionists] = useState([
-    {
-      id: 1,
-      name: "Brooklyn Simmons",
-      phone: "(217) 555-0113",
-      email: "brooklyn@gmail.com",
-      department: "Cardiology",
-      sex: "Female",
-    },
-    {
-      id: 2,
-      name: "Kristin Watson",
-      phone: "(308) 555-0121",
-      email: "kristin@gmail.com",
-      department: "Neurology",
-      sex: "Female",
-    },
-    {
-      id: 3,
-      name: "Jacob Jones",
-      phone: "(219) 555-0114",
-      email: "jacob@gmail.com",
-      department: "Orthopedics",
-      sex: "Male",
-    },
-  ]);
+  const queryClient = useQueryClient();
+  const { data, isLoading, isError } = useRecepQuery();
 
-  interface HandleEdit {
-    (id: number): void;
-  }
+  // State for modal and form
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedReceptionist, setSelectedReceptionist] =
+    useState<Receptionist | null>(null);
+  const [selectedReceptionistId, setSelectedReceptionistId] =
+    useState<string>("");
+  const [formData, setFormData] = useState<UpdateReceptionistForm>({
+    first_name: "",
+    last_name: "",
+    phone: "",
+    username: "",
+    email: "",
+    password: "",
+  });
 
-  const handleEdit: HandleEdit = (id) => {
-    console.log("Edit receptionist with id:", id);
-    // Add edit functionality here
+  // Update receptionist mutation
+  const updateReceptionistMutation = useMutation({
+    mutationFn: async ({
+      receptionistId,
+      data,
+    }: {
+      receptionistId: string;
+      data: UpdateReceptionistForm;
+    }) => {
+      console.log(
+        "Updating receptionist with ID:",
+        receptionistId,
+        "Data:",
+        data
+      );
+      if (!receptionistId || receptionistId === "undefined") {
+        throw new Error("Invalid receptionist ID");
+      }
+      const response = await updateRecepAPI(receptionistId, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recep"] });
+      setIsModalOpen(false);
+      setSelectedReceptionist(null);
+      setSelectedReceptionistId("");
+      alert("Receptionist updated successfully!");
+    },
+    onError: (error: any) => {
+      console.error("Error updating receptionist:", error);
+      alert(
+        `Error updating receptionist: ${
+          error.response?.data?.error || error.message
+        }`
+      );
+    },
+  });
+
+  // Delete receptionist mutation
+  const deleteReceptionistMutation = useMutation({
+    mutationFn: async (receptionistId: string) => {
+      console.log("Deleting receptionist with ID:", receptionistId);
+      if (!receptionistId || receptionistId === "undefined") {
+        throw new Error("Invalid receptionist ID");
+      }
+      const response = await deleteRecepAPI(receptionistId);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recep"] });
+      alert("Receptionist deleted successfully!");
+    },
+    onError: (error: any) => {
+      console.error("Error deleting receptionist:", error);
+      alert(
+        `Error deleting receptionist: ${
+          error.response?.data?.error || error.message
+        }`
+      );
+    },
+  });
+
+  const handleEditClick = (receptionist: Receptionist, index: number) => {
+    console.log("Selected receptionist:", receptionist);
+
+    // Check if receptionist_id exists, if not, use a fallback
+    const receptionistId = receptionist.receptionist.receptionist_id;
+
+    if (!receptionistId) {
+      alert(
+        "Cannot edit: Receptionist ID not found. Please refresh the page and try again."
+      );
+      return;
+    }
+
+    setSelectedReceptionist(receptionist);
+    setSelectedReceptionistId(receptionistId);
+
+    // Generate username from email or name
+    const username =
+      receptionist.email.split("@")[0] ||
+      `${receptionist.receptionist.first_name.toLowerCase()}.${receptionist.receptionist.last_name.toLowerCase()}`;
+
+    setFormData({
+      first_name: receptionist.receptionist.first_name,
+      last_name: receptionist.receptionist.last_name,
+      phone: receptionist.receptionist.phone,
+      username: username,
+      email: receptionist.email,
+      password: "",
+    });
+    setIsModalOpen(true);
   };
 
-  interface Receptionist {
-    id: number;
-    name: string;
-    phone: string;
-    email: string;
-    department: string;
-    sex: string;
-  }
+  const handleDeleteClick = (receptionist: Receptionist, index: number) => {
+    console.log("Delete receptionist:", receptionist);
 
-  const handleDelete = (id: number) => {
-    if (window.confirm("Are you sure you want to delete this receptionist?")) {
-      setReceptionists(
-        receptionists.filter(
-          (receptionist: Receptionist) => receptionist.id !== id
-        )
+    const receptionistId = receptionist.receptionist.receptionist_id;
+
+    if (!receptionistId) {
+      alert(
+        "Cannot delete: Receptionist ID not found. Please refresh the page and try again."
       );
+      return;
+    }
+
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${receptionist.receptionist.first_name} ${receptionist.receptionist.last_name}?`
+      )
+    ) {
+      deleteReceptionistMutation.mutate(receptionistId);
     }
   };
 
-  const handleAddReceptionist = () => {
-    console.log("Add new receptionist");
-    // Add new receptionist functionality here
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedReceptionistId) {
+      alert("Error: No receptionist selected for update");
+      return;
+    }
+
+    // Remove password if it's empty
+    const updateData = { ...formData };
+    if (!updateData.password?.trim()) {
+      delete updateData.password;
+    }
+
+    updateReceptionistMutation.mutate({
+      receptionistId: selectedReceptionistId,
+      data: updateData,
+    });
   };
 
-  const { data, isLoading } = useRecepQuery();
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedReceptionist(null);
+    setSelectedReceptionistId("");
+    setFormData({
+      first_name: "",
+      last_name: "",
+      phone: "",
+      username: "",
+      email: "",
+      password: "",
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="h-full w-full flex justify-center items-center">
         <LoadingScreen ram={60} />
       </div>
     );
+  }
+
+  if (isError || !data) {
+    return <p>Error loading receptionists.</p>;
   }
 
   return (
@@ -128,8 +252,11 @@ const ReceptionistsList = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {data?.map((item: any, index: number) => (
-                <tr key={index} className="hover:bg-gray-50">
+              {data?.map((item: Receptionist, index: number) => (
+                <tr
+                  key={item.receptionist.receptionist_id || index}
+                  className="hover:bg-gray-50"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
                       {item.receptionist.first_name}{" "}
@@ -147,14 +274,40 @@ const ReceptionistsList = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <button
-                        className="text-blue-600 hover:text-blue-800 p-1"
-                        title="Edit"
+                        className={`p-1 ${
+                          item.receptionist.receptionist_id
+                            ? "text-blue-600 hover:text-blue-800"
+                            : "text-gray-400 cursor-not-allowed"
+                        }`}
+                        title={
+                          item.receptionist.receptionist_id
+                            ? "Edit"
+                            : "ID not available"
+                        }
+                        onClick={() => handleEditClick(item, index)}
+                        disabled={
+                          !item.receptionist.receptionist_id ||
+                          updateReceptionistMutation.isPending
+                        }
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        className="text-red-600 hover:text-red-800 p-1"
-                        title="Delete"
+                        className={`p-1 ${
+                          item.receptionist.receptionist_id
+                            ? "text-red-600 hover:text-red-800"
+                            : "text-gray-400 cursor-not-allowed"
+                        }`}
+                        title={
+                          item.receptionist.receptionist_id
+                            ? "Delete"
+                            : "ID not available"
+                        }
+                        onClick={() => handleDeleteClick(item, index)}
+                        disabled={
+                          !item.receptionist.receptionist_id ||
+                          deleteReceptionistMutation.isPending
+                        }
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -166,6 +319,145 @@ const ReceptionistsList = () => {
           </table>
         </div>
       </div>
+
+      {/* Update Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold mb-4">
+                Update Receptionist
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* First Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.first_name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, first_name: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                {/* Last Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.last_name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, last_name: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                {/* Username */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Username <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) =>
+                      setFormData({ ...formData, username: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                {/* Password (Optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    New Password (Optional)
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Leave blank to keep current password"
+                  />
+                </div>
+
+                {/* Debug info - remove in production */}
+                <div className="text-xs text-gray-500">
+                  Receptionist ID: {selectedReceptionistId || "Not available"}
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={
+                      updateReceptionistMutation.isPending ||
+                      !selectedReceptionistId
+                    }
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400"
+                  >
+                    {updateReceptionistMutation.isPending
+                      ? "Updating..."
+                      : "Update"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
