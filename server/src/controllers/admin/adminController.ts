@@ -138,6 +138,7 @@ export const receptionists = AsyncError(
 
         receptionist: {
           select: {
+            receptionist_id: true,
             first_name: true,
             last_name: true,
             phone: true,
@@ -355,5 +356,131 @@ export const deleteReceptionist = AsyncError(
     res
       .status(200)
       .json({ message: "Receptionist and user deleted successfully" });
+  }
+);
+
+// ADDITIONAL LAB ASSISTANT FUNCTIONS
+export const createLabAssistant = AsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { first_name, last_name, username, email, password } = req.body;
+
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password,
+        role: "labassistant",
+      },
+    });
+
+    const labAssistant = await prisma.labAssistant.create({
+      data: {
+        first_name,
+        last_name,
+        userId: user.user_id,
+      },
+    });
+
+    res.status(201).json({
+      status: "success",
+      message: "Lab Assistant created successfully",
+      labAssistant,
+    });
+  }
+);
+
+export const updateLabAssistant = AsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const { first_name, last_name, username, email, password } = req.body;
+
+    const labAssistant = await prisma.labAssistant.update({
+      where: { lab_assistant_id: id },
+      data: {
+        first_name,
+        last_name,
+      },
+    });
+
+    await prisma.user.update({
+      where: { user_id: labAssistant.userId },
+      data: {
+        username,
+        email,
+        ...(password && { password }),
+      },
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Lab Assistant updated successfully",
+      labAssistant,
+    });
+  }
+);
+
+export const deleteLabAssistant = AsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    const labAssistant = await prisma.labAssistant.findUnique({
+      where: { lab_assistant_id: id },
+    });
+
+    if (!labAssistant) {
+      return res.status(404).json({ error: "Lab Assistant not found" });
+    }
+
+    await prisma.labAssistant.delete({
+      where: { lab_assistant_id: id },
+    });
+
+    await prisma.user.delete({
+      where: { user_id: labAssistant.userId },
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Lab Assistant and user deleted successfully",
+    });
+  }
+);
+
+// LAB ASSISTANTS GET FUNCTION
+
+export const labAssistants = AsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const labAssistants = await prisma.user.findMany({
+      where: {
+        OR: [
+          { role: "lab_assistant" }, // With underscore
+          { role: "labassistant" }, // Without underscore
+        ],
+      },
+      select: {
+        email: true,
+        labAssistant: {
+          select: {
+            lab_assistant_id: true,
+            first_name: true,
+            last_name: true,
+            created_at: true,
+            userId: true,
+          },
+        },
+      },
+      orderBy: {
+        labAssistant: {
+          created_at: "desc",
+        },
+      },
+    });
+
+    console.log("Found lab assistants count:", labAssistants.length);
+
+    return res.status(200).json({
+      status: "success",
+      labAssistants,
+    });
   }
 );
