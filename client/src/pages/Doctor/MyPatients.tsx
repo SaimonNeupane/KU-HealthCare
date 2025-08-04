@@ -13,8 +13,8 @@ interface PatientData {
   first_name: string;
   last_name: string;
   LabTest: Array<{
-    status: string;
-  }>;
+    status: string | null; // status can be null
+  }> | null; // LabTest array itself can be null
   bed: {
     bed_number?: string;
   } | null;
@@ -32,7 +32,7 @@ interface PatientRowProps {
   roomNumber: string;
   bedAssignment: string;
   bedAssignmentType: "assigned" | "not-assigned";
-  labReportStatus: "arrived" | "pending";
+  labReportStatus: "arrived" | "pending" | "none";
   patientId?: string;
   age?: number;
   admissionDate?: string;
@@ -87,9 +87,13 @@ const PatientRow: React.FC<PatientRowProps> = ({
             <span className="px-4 py-2 bg-green-200 text-green-800 rounded-full text-sm font-medium">
               Arrived
             </span>
-          ) : (
+          ) : labReportStatus === "pending" ? (
             <span className="px-4 py-2 bg-gray-200 text-gray-600 rounded-full text-sm font-medium">
               Pending
+            </span>
+          ) : (
+            <span className="px-4 py-2 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium">
+              None
             </span>
           )}
         </div>
@@ -133,9 +137,34 @@ const transformPatientData = (patient: PatientData): PatientRowProps => {
     `${patient.first_name || ""} ${patient.last_name || ""}`.trim() ||
     `Patient ${patient.patient_id.substring(0, 8)}`;
 
-  const hasLabResults =
+  // Determine if any completed lab test
+  let labReportStatus: "arrived" | "pending" | "none" = "none";
+  if (
     patient.LabTest &&
-    patient.LabTest.some((test) => test.status === "completed");
+    Array.isArray(patient.LabTest) &&
+    patient.LabTest.length > 0
+  ) {
+    if (
+      patient.LabTest.some(
+        (test) =>
+          test.status &&
+          typeof test.status === "string" &&
+          test.status.toLowerCase() === "completed"
+      )
+    ) {
+      labReportStatus = "arrived";
+    } else if (
+      patient.LabTest.some(
+        (test) =>
+          test.status &&
+          typeof test.status === "string" &&
+          (test.status.toLowerCase() === "pending" ||
+            test.status.toLowerCase() === "processing")
+      )
+    ) {
+      labReportStatus = "pending";
+    }
+  }
 
   const hasBed = patient.bed !== null;
 
@@ -183,9 +212,7 @@ const transformPatientData = (patient: PatientData): PatientRowProps => {
     bedAssignmentType: hasBed
       ? ("assigned" as const)
       : ("not-assigned" as const),
-    labReportStatus: hasLabResults
-      ? ("arrived" as const)
-      : ("pending" as const),
+    labReportStatus,
     patientId: patient.patient_id,
     age: patient.age,
     admissionDate: admissionDate,

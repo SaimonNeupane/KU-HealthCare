@@ -113,11 +113,11 @@ export const showDoctors = AsyncError(
         last_name: true,
         specialization: true,
         roomId: true,
-        room:{
-          select:{
-            room_number:true
-          }
-        }
+        room: {
+          select: {
+            room_number: true,
+          },
+        },
       },
     });
     if (!AvailableDoctor || AvailableDoctor.length == 0) {
@@ -170,7 +170,7 @@ export const RegisterPatient = AsyncError(
     const createdPatient = await client.patient.create({
       data: {
         ...req.body.patientDetails,
-         bedId: availableBed ? availableBed.bed_id : null,
+        bedId: availableBed ? availableBed.bed_id : null,
       },
     });
 

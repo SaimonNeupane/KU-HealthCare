@@ -1,23 +1,34 @@
+import { useAuth } from "../../contexts/AuthContext";
 import { useSocket } from "../../contexts/socketContext";
 import { useEffect, useState } from "react";
 
 export default function Notifications() {
   const socket = useSocket();
   const [name, setName] = useState();
+  const [patientId, setPatientId] = useState();
   const [name1, setName1] = useState();
+  const [doctorName, setDoctorName] = useState();
+  const { role, user_id } = useAuth();
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("lab-report-arrived", async ({ patientName }) => {
-      setName(patientName);
-      console.log(patientName);
-    });
+    socket.emit("join-room", { role, roomId: user_id });
 
-    socket.on("patient-registered", async ({ patientName }) => {
+    socket.on(
+      "emit-lab-report-arrived",
+      async ({ patientName, patientId, doctorName }) => {
+        setName(patientName);
+        setPatientId(patientId);
+        setDoctorName(doctorName);
+      }
+    );
+
+    socket.on("emit-patient-registered", async ({ patientName }) => {
       setName1(patientName);
     });
   }, [socket]);
+
   const notifications = [
     {
       id: 1,
@@ -41,7 +52,9 @@ export default function Notifications() {
       id: 3,
       icon: "report.svg",
       title: `Lab report Arrived: ${!!name ? name : "parikchit"}`,
-      subtitle: "Assigned to Dr. Adams",
+      subtitle: `Assigned to ${
+        !!doctorName ? `Dr. ${doctorName}` : "Dr. Adams"
+      }`,
       time: "20 min",
       bgColor: "#BBF7D0",
       iconColor: "text-black-600",

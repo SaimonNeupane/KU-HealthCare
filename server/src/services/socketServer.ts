@@ -22,6 +22,9 @@ const initializeSocket = (httpServer: HttpServer) => {
       if (role === "doctor") {
         socket.join(roomId);
       }
+      if (role === "admin") {
+        socket.join("admin");
+      }
     });
 
     if (role === "doctor" && user_id) {
@@ -53,7 +56,7 @@ const initializeSocket = (httpServer: HttpServer) => {
           if (!!recipient_id && !!sender_id && !!id) {
             const doctor = await prisma.doctor.findUnique({
               where: { doctor_id: recipient_id },
-              select: { userId: true },
+              select: { userId: true, first_name: true },
             });
 
             const labAssistant = await prisma.labAssistant.findUnique({
@@ -87,6 +90,12 @@ const initializeSocket = (httpServer: HttpServer) => {
               patientName,
               patientId: id,
             });
+
+            io.to("admin").emit("emit-lab-report-arrived", {
+              patientName,
+              patientId: id,
+              doctorName: doctor.first_name,
+            });
             console.log("Notification created successfully");
           }
         } catch (error) {
@@ -95,11 +104,21 @@ const initializeSocket = (httpServer: HttpServer) => {
       }
     );
 
-    socket.on("new-patient-registered", ({ patientName, email }) => {
-      // console.log(patientName, email);
-      if (role === "doctor" || role === "admin") {
-        io.emit("emit-patient-registered", { patientName, email });
-      }
+    socket.on("new-patient-registered", async ({ patientName, doctorId }) => {
+      console.log(
+        "PATIENT REGISTERED EVENT TRIGGERED!!!",
+        patientName,
+        doctorId
+      );
+
+      const doctor = await prisma.doctor.findUnique({
+        where: { doctor_id: doctorId },
+        select: { userId: true, first_name: true },
+      });
+
+      io.to("admin").emit("emit-patient-registered", { patientName });
+      if (doctor)
+        io.to(doctor.userId).emit("emit-patient-registered", { patientName });
     });
 
     socket.on("bed-assigned", ({ patientName }) => {

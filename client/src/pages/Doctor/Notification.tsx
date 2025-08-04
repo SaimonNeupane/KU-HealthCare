@@ -13,6 +13,20 @@ interface NotificationItemProps {
   onView: () => void;
 }
 
+type NotificationType =
+  | {
+      type: "patient-registered";
+      patientName: string;
+      patientId?: string;
+      createdAt: Date;
+    }
+  | {
+      type: "lab-report";
+      patientName: string;
+      patientId: string;
+      createdAt: Date;
+    };
+
 const NotificationItem: React.FC<NotificationItemProps> = ({
   icon,
   title,
@@ -44,18 +58,22 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   );
 };
 
+function getRelativeTime(date: Date): string {
+  const now = new Date();
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // in seconds
+
+  if (diff < 60) return "Just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)} mins ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hrs ago`;
+  return date.toLocaleDateString();
+}
+
 const Notification: React.FC = () => {
   const navigate = useNavigate();
   const socket = useSocket();
-  const [notifications, setNotifications] = useState<
-    Array<{ patientName: string; patientId: string }>
-  >([]);
+  const [notifications, setNotifications] = useState<NotificationType[]>([]);
 
-  const handleView = (userId: string) => {
-    navigate(`../patient/${userId}`);
-  };
-
-  const { user_id } = useAuth();
+  const { user_id, logout } = useAuth();
 
   useEffect(() => {
     if (!socket || !user_id) return;
@@ -65,12 +83,15 @@ const Notification: React.FC = () => {
       role: "doctor",
     });
 
-    console.log(`Doctor joining room: ${user_id}`);
+    // Optionally, join other relevant rooms here if needed
+
+    // eslint-disable-next-line
   }, [socket, user_id]);
 
   useEffect(() => {
     if (!socket) return;
 
+    // Handler for lab report arrived
     const handleLabReportArrived = ({
       patientName,
       patientId,
@@ -78,18 +99,59 @@ const Notification: React.FC = () => {
       patientName: string;
       patientId: string;
     }) => {
-      setNotifications((prev) => [...prev, { patientName, patientId }]);
-      console.log(patientName, patientId);
+      setNotifications((prev) => [
+        ...prev,
+        {
+          type: "lab-report",
+          patientName,
+          patientId,
+          createdAt: new Date(),
+        },
+      ]);
+    };
+
+    // Handler for patient registered
+    const handlePatientRegistered = ({
+      patientName,
+      patientId,
+    }: {
+      patientName: string;
+      patientId?: string;
+    }) => {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          type: "patient-registered",
+          patientName,
+          patientId,
+          createdAt: new Date(),
+        },
+      ]);
+      console.log(patientId, patientName);
     };
 
     socket.on("emit-lab-report-arrived", handleLabReportArrived);
+    socket.on("emit-patient-registered", handlePatientRegistered);
 
     return () => {
       socket.off("emit-lab-report-arrived", handleLabReportArrived);
+      socket.off("emit-patient-registered", handlePatientRegistered);
     };
   }, [socket]);
 
-  const { logout } = useAuth();
+  const handleView = (patientId?: string) => {
+    if (patientId) {
+      navigate(`../patient/${patientId}`);
+    } else {
+      // fallback, no patientId available
+      navigate("../patients");
+    }
+  };
+
+  // Sort notifications by newest first
+  const sortedNotifications = [...notifications].sort(
+    (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -103,23 +165,45 @@ const Notification: React.FC = () => {
             <LogOut onClick={logout} />
           </div>
           <div className="space-y-3">
-            {notifications.map((notification, index) => (
-              <NotificationItem
-                key={index}
-                icon={<FaUserPlus className="w-6 h-6" />}
-                title={`New patient appointed: ${notification.patientName}`}
-                subtitle="Auto-assigned Patient ID: 12345"
-                timeAgo="2 mins ago"
-                onView={() => handleView(notification.patientId)}
-              />
-            ))}
-
-            <NotificationItem
-              icon={<FaClipboardList className="w-6 h-6" />}
-              title="Lab report Arrived: Parikchit Sen"
-              timeAgo="20 mins ago"
-              onView={() => handleView("userid")} // Replace with actual patient ID when available
-            />
+            {sortedNotifications.length === 0 && (
+              <div className="text-gray-500 text-center py-8">
+                No notifications yet.
+              </div>
+            )}
+            {sortedNotifications.map((notification, index) => {
+              if (notification.type === "lab-report") {
+                return (
+                  <NotificationItem
+                    key={`${notification.type}-${notification.patientId}-${index}`}
+                    icon={<FaClipboardList className="w-6 h-6" />}
+                    title={`Lab report arrived: ${notification.patientName}`}
+                    subtitle={
+                      notification.patientId
+                        ? `Auto-assigned Patient ID: ${notification.patientId}`
+                        : undefined
+                    }
+                    timeAgo={getRelativeTime(notification.createdAt)}
+                    onView={() => handleView(notification.patientId)}
+                  />
+                );
+              } else if (notification.type === "patient-registered") {
+                return (
+                  <NotificationItem
+                    key={`${notification.type}-${notification.patientName}-${index}`}
+                    icon={<FaUserPlus className="w-6 h-6" />}
+                    title={`New patient registered: ${notification.patientName}`}
+                    subtitle={
+                      notification.patientId
+                        ? `Auto-assigned Patient ID: ${notification.patientId}`
+                        : undefined
+                    }
+                    timeAgo={getRelativeTime(notification.createdAt)}
+                    onView={() => handleView(notification.patientId)}
+                  />
+                );
+              }
+              return null;
+            })}
           </div>
         </div>
       </main>
