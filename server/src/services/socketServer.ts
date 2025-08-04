@@ -116,9 +116,13 @@ const initializeSocket = (httpServer: HttpServer) => {
         select: { userId: true, first_name: true },
       });
 
-      io.to("admin").emit("emit-patient-registered", { patientName });
-      if (doctor)
+      if (doctor) {
+        io.to("admin").emit("emit-patient-registered", {
+          patientName,
+          doctorName: doctor.first_name,
+        });
         io.to(doctor.userId).emit("emit-patient-registered", { patientName });
+      }
     });
 
     socket.on("bed-assigned", ({ patientName }) => {
