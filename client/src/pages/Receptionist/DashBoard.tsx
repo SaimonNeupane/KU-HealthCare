@@ -35,7 +35,7 @@ const Header: React.FC = () => {
         <div className="flex items-center space-x-8">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center">
-              <span className="text-white font-bold text-sm">◆</span>
+              <span className="text-white font-bold text-sm">KU</span>
             </div>
             <span className="text-gray-900 font-semibold text-lg">
               KU Health Care

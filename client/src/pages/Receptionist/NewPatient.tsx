@@ -77,7 +77,7 @@ const Header: React.FC = () => {
           </div>
 
           <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
-            <FaExternalLinkAlt className="w-5 h-5" />
+            {/* <FaExternalLinkAlt className="w-5 h-5" /> */}
           </button>
         </div>
       </div>
