@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { configDotenv } from "dotenv";
 import HttpError from "../Errors/httpError";
+import bcrypt from "bcrypt";
 
 configDotenv();
 
@@ -33,8 +34,9 @@ export const login = AsyncError(
       return next(new HttpError(401, "Invalid credentials"));
     }
 
-    // Check password
-    if (found.password !== password) {
+    // Compare hashed password
+    const isMatch = await bcrypt.compare(password, found.password);
+    if (!isMatch) {
       return next(new HttpError(401, "Invalid credentials"));
     }
 

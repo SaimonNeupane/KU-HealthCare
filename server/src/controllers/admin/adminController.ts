@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import tr from "zod/v4/locales/tr.cjs";
 import { assert } from "console";
 import { treeifyError } from "zod";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -178,11 +179,14 @@ export const createDoctor = AsyncError(
       return res.status(404).json({ error: "Department not found" });
     }
 
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
       data: {
         username,
         email,
-        password,
+        password: hashedPassword,
         role,
       },
     });
@@ -247,9 +251,10 @@ export const updateDoctor = AsyncError(
     });
 
     if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
       await prisma.user.update({
         where: { user_id: updatedDoctor.userId },
-        data: { password },
+        data: { password: hashedPassword },
       });
     }
 
@@ -283,11 +288,13 @@ export const createReceptionist = AsyncError(
     const { first_name, last_name, phone, username, email, password } =
       req.body;
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
       data: {
         username,
         email,
-        password,
+        password: hashedPassword,
         role: "receptionist",
       },
     });
@@ -320,13 +327,14 @@ export const updateReceptionist = AsyncError(
       },
     });
 
+    let userData: any = { username, email };
+    if (password) {
+      userData.password = await bcrypt.hash(password, 10);
+    }
+
     await prisma.user.update({
       where: { user_id: receptionist.userId },
-      data: {
-        username,
-        email,
-        ...(password && { password }),
-      },
+      data: userData,
     });
 
     res.status(200).json({ message: "Receptionist updated successfully." });
@@ -364,11 +372,13 @@ export const createLabAssistant = AsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const { first_name, last_name, username, email, password } = req.body;
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
       data: {
         username,
         email,
-        password,
+        password: hashedPassword,
         role: "labassistant",
       },
     });
@@ -402,13 +412,14 @@ export const updateLabAssistant = AsyncError(
       },
     });
 
+    let userData: any = { username, email };
+    if (password) {
+      userData.password = await bcrypt.hash(password, 10);
+    }
+
     await prisma.user.update({
       where: { user_id: labAssistant.userId },
-      data: {
-        username,
-        email,
-        ...(password && { password }),
-      },
+      data: userData,
     });
 
     res.status(200).json({
