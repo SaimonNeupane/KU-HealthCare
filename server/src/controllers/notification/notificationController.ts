@@ -19,6 +19,7 @@ export const getNotifications: RequestHandler = async (
     const notifications = await prisma.notification.findMany({
       select: {
         notification_id: true,
+        userUser_id: true,
         message: true,
         sender_user_id: true,
         created_at: true,

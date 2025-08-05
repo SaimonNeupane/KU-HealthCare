@@ -64,6 +64,11 @@ const initializeSocket = (httpServer: HttpServer) => {
               select: { userId: true },
             });
 
+            const admin = await prisma.user.findFirst({
+              where: { role: "admin" },
+              select: { user_id: true },
+            });
+
             if (!doctor?.userId) {
               console.error(`Doctor not found with doctor_id: ${recipient_id}`);
               return;
@@ -76,15 +81,25 @@ const initializeSocket = (httpServer: HttpServer) => {
               return;
             }
 
+            if (!!admin) {
+              await prisma.notification.create({
+                data: {
+                  message: `lab report arrived`,
+                  recipient_user_id: admin.user_id,
+                  sender_user_id: labAssistant.userId,
+                  userUser_id: id,
+                },
+              });
+            }
+
             await prisma.notification.create({
               data: {
-                message: "lab report arrived",
+                message: `lab report arrived ${patientName}`,
                 recipient_user_id: doctor.userId,
                 sender_user_id: labAssistant.userId,
                 userUser_id: id,
               },
             });
-            console.log("doctor id check", doctor.userId);
 
             io.to(doctor.userId).emit("emit-lab-report-arrived", {
               patientName,

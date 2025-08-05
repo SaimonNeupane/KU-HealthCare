@@ -199,11 +199,11 @@ export const deleteNotifAPI = (id: string) =>
 export const getNotifAPI = (id: string) => baseURL.get(`/notifications/${id}`);
 
 export const getNotificationsAPI = (userId: string) => {
-  return baseURL.get(`/notifications/${userId}`);
+  return baseURL.get(`/notification/${userId}`);
 };
 
 export const deleteNotificationAPI = (notificationId: string) => {
-  return baseURL.delete(`/notifications/${notificationId}`);
+  return baseURL.delete(`/notification/${notificationId}`);
 };
 
 // Aliases for signup component
