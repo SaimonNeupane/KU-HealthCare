@@ -252,7 +252,7 @@ export default function DoctorsList() {
               <tr key={doctor.doctor_id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
-                    {doctor.first_name} {doctor.last_name}
+                    Dr. {doctor.first_name} {doctor.last_name}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
