@@ -71,7 +71,7 @@ const Header: React.FC = () => {
 
         {/* Right Side - Search and Export */}
         <div className="flex items-center space-x-4">
-          <div className="relative">
+          {/* <div className="relative">
             <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
@@ -80,7 +80,7 @@ const Header: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors w-64"
             />
-          </div>
+          </div> */}
 
           <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
             <LuLogOut className="w-5 h-5" onClick={logout} />
@@ -323,7 +323,7 @@ function Dashboard() {
 
       <div className="container mx-auto px-4 py-6">
         {/* Header with Refresh Button */}
-        <div className="flex justify-between items-center mb-6">
+        {/* <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <button
             onClick={() => refetchAll()}
@@ -331,7 +331,7 @@ function Dashboard() {
           >
             Refresh Data
           </button>
-        </div>
+        </div> */}
 
         {/* Toggle Buttons */}
         <div className="flex mb-6 bg-white rounded-lg p-1 shadow-sm border border-gray-200 max-w-2xl mx-auto">
@@ -360,7 +360,54 @@ function Dashboard() {
         </div>
 
         {/* Table Container */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6 ">
+          {/* stats card */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-15">
+            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Total Doctors</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {doctors.length}
+                  </p>
+                </div>
+                <Stethoscope className="w-6 h-6 text-green-500" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Online Doctors</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {doctors.filter((d) => d.doctor.is_online).length}
+                  </p>
+                </div>
+                <Activity className="w-6 h-6 text-blue-500" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Total Patients</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {patients.length}
+                  </p>
+                </div>
+                <Users className="w-6 h-6 text-purple-500" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Beds Occupied</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {patients.filter((p) => p.bed && p.bed.bed_number).length}
+                  </p>
+                </div>
+                <Bed className="w-6 h-6 text-orange-500" />
+              </div>
+            </div>
+          </div>
           {/* Doctors Table */}
           {activeSection === "doctor" && (
             <div className="overflow-x-auto">
@@ -547,54 +594,6 @@ function Dashboard() {
               )}
             </div>
           )}
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Doctors</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {doctors.length}
-                </p>
-              </div>
-              <Stethoscope className="w-6 h-6 text-green-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Online Doctors</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {doctors.filter((d) => d.doctor.is_online).length}
-                </p>
-              </div>
-              <Activity className="w-6 h-6 text-blue-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Patients</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {patients.length}
-                </p>
-              </div>
-              <Users className="w-6 h-6 text-purple-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Beds Occupied</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {patients.filter((p) => p.bed && p.bed.bed_number).length}
-                </p>
-              </div>
-              <Bed className="w-6 h-6 text-orange-500" />
-            </div>
-          </div>
         </div>
       </div>
     </div>
