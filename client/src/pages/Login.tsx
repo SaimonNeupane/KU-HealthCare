@@ -103,7 +103,7 @@ function Login() {
                   itemType="email"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Username or email <span className="text-red-500">*</span>
+                  email <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
